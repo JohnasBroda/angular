@@ -1,0 +1,129 @@
+<div class="row d-block">
+
+  <div class="sidenav border border-primary" *ngIf="sideNavState === 'active'" [@sideNavTrigger]="sideNavState">
+    <span class="col-md-12 d-block py-4">
+      <span class="w-100">Price range: {{ filterPriceRange[0] }} - {{ filterPriceRange[1] }}</span>
+      <p-slider
+        [(ngModel)]="filterPriceRange"
+        step="1"
+        [range]="true"
+        min="0"
+        max="100"
+        (onSlideEnd)="onSlideEnd()"
+        (onChange)="onSlideChange($event)">
+      </p-slider>
+    </span>
+    <span class="col-md-12 d-block py-4">
+      Selected categories:
+      <p-checkbox 
+        *ngFor="let category of productCategories"
+        class="col-md-10 mx-auto d-inline-block"
+        name="filterCategories"
+        [value]="category"
+        [label]="category"
+        [(ngModel)]="filterCategories"
+        (onChange)="onCategoriesChange()">
+      </p-checkbox>
+    </span>
+  </div>
+
+  <div 
+    [@mainTrigger]="mainState"
+    class="main">
+    <div class="row d-flex justify-content-center position-relative" *ngIf="isReady">
+
+      <span class="col-md-12 d-flex">
+        <span class="col-md-1 align-self-start">
+          <button class="btn btn-default" (click)="toggleSideNav()">
+            <i class="fa fa-bars"></i>
+          </button>
+        </span>
+        <span class="w-50 mx-auto">
+          <p-paginator [rows]="pageEvent.rows" [first]="pageEvent.first" [totalRecords]="productsCount | async" [pageLinkSize]="pageLinkSize | async"
+            [rowsPerPageOptions]="pageSizeOptions" (onPageChange)="pageEventHandler($event)">
+          </p-paginator>
+        </span>
+      </span>
+
+      <div class="row p-3 d-flex-row justify-content-center align-items-center">
+        <div class="d-flex justify-content-center col-md-12" *ngIf="isReady">
+          <span class="col-md-2">
+            <mat-form-field>
+              <mat-select [(value)]="displayMode">
+                <mat-option [value]="gridOfTwo">
+                  <i class="fa fa-th-large"></i>
+                  2 card wide Grid
+                </mat-option>
+                <mat-option [value]="gridOfThree">
+                  <i class="fa fa-th"></i>
+                  3 card wide Grid
+                </mat-option>
+                <mat-option [value]="gridOfFour">
+                  <span>
+                    <i class="fa fa-th-large"></i>
+                    <i class="fa fa-th-large"></i>
+                  </span>
+                  4 card wide grid
+                </mat-option>
+                <mat-option [value]="listDisplay">
+                  <i class="fa fa-th-list"></i>
+                  list
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </span>
+
+          <span class="col-md-2">
+            <mat-form-field>
+              <mat-select [(value)]="appliedSortMode" (selectionChange)="onSortChange()" placeholder="Choose a sort mode">
+                <mat-option *ngFor="let mode of sortModes" [value]="mode">
+                  <i class="{{mode.icon}}"></i>
+                  {{ mode.text }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </span>
+
+          <span class="col-md-2 d-flex jusify-content-center">
+            <mat-form-field>
+              <input type="text" matInput [formControl]="searchControl" [matAutocomplete]="auto" (keyup.enter)="onEnter($event)">
+              <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onSearchInput($event.option.value)" autoActiveFirstOption="true">
+                <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+                  {{ option }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </span>
+
+        </div>
+        <ng-container *ngIf="isReady" class="col-md-12 p-3">
+          <app-product-card 
+            *ngFor="let product of filteredProducts | paginator: pageEvent"
+            [product]="product"
+            [currentUser]="currentUser"
+            [ngClass]="displayMode"
+            (select)="onInspect(product)"
+            (edit)="onEdit(product)"
+            class="d-block p-0">
+          </app-product-card>
+        </ng-container>
+        <div *ngIf="!isReady" class="col-md-12 align-middle h-100">
+          <mat-progress-spinner mode="indeterminate">
+          </mat-progress-spinner>
+        </div>
+      </div>
+      <div class="col-md-12 d-flex justify-content-center" *ngIf="isReady">
+        <span class="w-50 mx-auto">
+          <p-paginator [rows]="pageEvent.rows" [first]="pageEvent.first" [totalRecords]="productsCount | async" [pageLinkSize]="pageLinkSize | async"
+            [rowsPerPageOptions]="pageSizeOptions" (onPageChange)="pageEventHandler($event)">
+          </p-paginator>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+<button (click)="scrollToTop()"
+*ngIf="isScrollable | async"
+  class="position-fixed btn btn-default border rounded floatedScrollBtn">
+  <i class="fa fa-angle-double-up"></i>
+</button>

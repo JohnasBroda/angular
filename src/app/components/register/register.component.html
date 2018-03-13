@@ -1,0 +1,157 @@
+<div class="col-md-12 d-flex justify-content-center">
+    <form [formGroup]="registerForm" (ngSubmit)="register()" class="d-flex-column w-25">
+        <div *ngIf="formSubmitted && registerForm.errors" class="alert alert-danger">
+            {{ registerForm.errors.emailTaken.errorMsg }}
+        </div>
+        <div formGroupName="mandatory" class="w-100">
+            <mat-form-field class="px-auto my-2 col-md-12">
+                <input formControlName="firstName" type="text" id="firstName" matInput placeholder="First Name">
+                <span matSuffix *ngIf="firstName.dirty && firstName.valid" class="fa fa-check-circle text-success p-1"></span>
+                <mat-error *ngIf="firstName.touched && firstName.invalid">
+                    <span *ngIf="firstName.errors.required">First Name is required!</span>
+                    <span *ngIf="firstName.errors.minlength">
+                      First Name must be at least {{ firstName.errors.minlength.requiredLength }} characters long!
+                    </span>
+                    <span *ngIf="firstName.errors.cannotContainSpace">
+                    {{ firstName.errors.cannotContainSpace.errorMsg }}
+                  </span>
+                </mat-error>
+            </mat-form-field>
+            <mat-form-field class="px-auto my-2 col-md-12">
+                <input formControlName="lastName" type="text" id="lastName" matInput placeholder="Last Name">
+                <span matSuffix *ngIf="lastName.dirty && lastName.valid" class="fa fa-check-circle text-success p-1"></span>
+                <mat-error *ngIf="lastName.touched && lastName.invalid">
+                    <span *ngIf="lastName.errors.required">Last Name is required!</span>
+                    <span *ngIf="lastName.errors.minlength">
+                        Last Name must be at least {{ lastName.errors.minlength.requiredLength }} characters long!
+                    </span>
+                    <span *ngIf="lastName.errors.cannotContainSpace">
+                        {{ lastName.errors.cannotcontainSpace.errorMsg }}
+                    </span>
+                </mat-error>
+            </mat-form-field>
+            <mat-form-field class="px-auto my-2 col-md-12">
+                <input formControlName="email" type="text" id="email" matInput placeholder="Email" class="w-75">
+                <span matSuffix *ngIf="email.dirty && email.valid" class="fa fa-check-circle text-success p-1"></span>
+                <mat-error *ngIf="email.touched && email.invalid">
+                    <span *ngIf="email.errors.required">Email is required!</span>
+                    <span *ngIf="email.errors.minlength">
+                      Email must be at least {{ email.errors.minlength.requiredLength }} characters long!
+                  </span>
+                    <span *ngIf="email.errors.email">
+                      Email must be a valid e-mail adress!
+                  </span>
+                    <span *ngIf="email.errors.emailTaken">
+                        {{ email.errors.emailTaken.errorMsg }}
+                    </span>
+                </mat-error>
+            </mat-form-field>
+                <mat-progress-spinner
+                    *ngIf="email.dirty && email.pending"
+                    mode="indeterminate"
+                    class="h-100">
+                </mat-progress-spinner>
+            <div class="col-md-12 my-2 px-auto">
+                <mat-form-field class="col-md-10 px-0">
+                    <input #password formControlName="pw" type="password" id="password" matInput placeholder="Password">
+                    <span matSuffix *ngIf="pw.dirty && pw.valid" class="fa fa-check-circle text-success p-1"></span>
+                    <mat-error *ngIf="pw.touched && pw.invalid">
+                        <span *ngIf="pw.errors.required">
+                          Password is required!
+                      </span>
+                        <span *ngIf="pw.errors.minlength">
+                          Password must be at least {{ pw.errors.minlength.requiredLength }} characters!
+                      </span>
+                        <span *ngIf="pw.errors.maxlength">
+                          Password cannot exceed {{ pw.errors.maxlength.requiredLength }} characters!
+                      </span>
+                        <span *ngIf="pw.errors.cannotContainSpace">
+                          {{ pw.errors.cannotContainSpace.errorMsg }}
+                      </span>
+                        <span *ngIf="pw.errors.shouldContainCapitalLetters">
+                          {{ pw.errors.shouldContainCapitalLetters.errorMsg}}
+                      </span>
+                    </mat-error>
+                </mat-form-field>
+                <button type="button" mat-mini-fab color="primary" (click)="showHidePassword(password)" class="ml-1">
+                  <i class="fa fa-eye-slash"></i>
+                </button>
+            </div>
+            <div class="col-md-12 my-2 px-auto">
+                <mat-form-field class="col-md-10 px-0">
+                    <input #passwordConfirm formControlName="pw2" type="password" id="password2" matInput placeholder="Password Confirm">
+                    <span matSuffix *ngIf="pw2.dirty && pw2.valid" class="fa fa-check-circle text-success p-1"></span>
+                    <mat-error *ngIf="pw2.touched && pw2.invalid">
+                        <span *ngIf="pw2.errors.required">
+                        Password confirmation is required!
+                      </span>
+                        <span *ngIf="pw2.errors.minlength">
+                          Password must be at least {{ pw2.errors.minlength.requiredLength }} characters!
+                      </span>
+                        <span *ngIf="pw2.errors.maxlength">
+                          Password cannot exceed {{ pw2.errors.maxlength.requiredLength }} characters!
+                      </span>
+                        <span *ngIf="pw2.errors.cannotContainSpace">
+                          {{ pw2.errors.cannotContainSpace.errorMsg }}
+                      </span>
+                        <span *ngIf="pw2.errors.shouldContainCapitalLetters">
+                          {{ pw2.errors.shouldContainCapitalLetters.errorMsg}}
+                      </span>
+                        <span *ngIf="pw2.errors.passwordconfirm">
+                          {{ pw2.errors.passwordconfirm.errorMsg}}
+                      </span>
+                    </mat-error>
+                </mat-form-field>
+                <button type="button" mat-mini-fab color="primary" (click)="showHidePassword(passwordConfirm)" class="ml-1">
+                  <i class="fa fa-eye-slash"></i>
+                </button>
+            </div>
+        </div>
+        <div formGroupName="optional" class="w-100">
+            <mat-form-field class="px-auto my-2 col-md-12">
+                <span matPrefix class="p-1">+36 &nbsp;</span>
+                <input formControlName="phone" type="phone" id="phone" matInput placeholder="Phone">
+                <span matSuffix *ngIf="phone.dirty && phone.valid" class="fa fa-check-circle text-success p-1"></span>
+                <mat-error *ngIf="phone.touched && phone.invalid">
+                    <span *ngIf="phone.errors.pattern">
+                    Please provide a valid phone number!
+                    <i class="fa fa-info-circle text-primary" (click)="showHidePhonePopUp()" [popover]="phonePopTemplate" popoverTitle="Correct formats are:" [outsideClick]="true" placement="right" containerClass="text-primary h5 font-weight-light"></i>
+                  </span>
+                </mat-error>
+            </mat-form-field>
+        </div>
+        <div class="d-flex justify-content-center">
+            <button type="button" mat-raised-button color="primary" [disabled]="registerForm.pristine" (click)="registerForm.reset()">
+                Reset
+            </button>
+            <button type="submit" mat-raised-button color="primary" [disabled]="registerForm.invalid">
+              Register
+            </button>
+        </div>
+    </form>
+</div>
+
+<ng-template #phonePopTemplate>
+    <ul class="list-unstyled font-weight-light h6 text-primary">
+        <li>
+            <i class="fa fa-chevron-right"></i> (123) 456-7890</li>
+        <li>
+            <i class="fa fa-chevron-right"></i> (123)456-7890
+        </li>
+        <li>
+            <i class="fa fa-chevron-right"></i> 123-456-7890
+        </li>
+        <li>
+            <i class="fa fa-chevron-right"></i> 123.456.7890
+        </li>
+        <li>
+            <i class="fa fa-chevron-right"></i> 1234567890
+        </li>
+        <li>
+            <i class="fa fa-chevron-right"></i> +31636363634
+        </li>
+        <li>
+            <i class="fa fa-chevron-right"></i> 075-63546725
+        </li>
+    </ul>
+</ng-template>

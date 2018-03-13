@@ -1,0 +1,20 @@
+<h2 mat-dialog-title>Add to cart</h2>
+<mat-dialog-content>
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title>{{ product.name}}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <img mat-card-image src="product.pic" alt="desc">
+        </mat-card-content>
+        <span class="w-100 d-flex justify-content-center" [formGroup]="amountGroup">
+            <button pButton type="button" (click)="increaseAmount()" class="ui-button-secondary" icon="fa-plus"></button>
+            <input type="text" formControlName="productAmount" matInput class="w-25 pl-2" id="amount" />
+            <button pButton type="button" (click)="decreaseAmount()" [disabled]="amount === 1" class="ui-button-secondary" icon="fa-minus"></button>
+        </span>
+    </mat-card>
+</mat-dialog-content>
+<mat-dialog-actions class="d-flex justify-content-center w-100">
+  <button mat-button [mat-dialog-close]="true" (click)="dialogClose(amount)">Add</button>
+  <button mat-button [mat-dialog-close]="" (click)="dialogClose()">Cancel</button>
+</mat-dialog-actions>

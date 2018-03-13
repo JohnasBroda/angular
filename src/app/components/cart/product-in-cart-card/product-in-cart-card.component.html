@@ -1,0 +1,20 @@
+<mat-card class="product-card d-flex-column justify-content-center border border-primary">
+  <mat-card-header class="w-100 h-25 d-inline-flex justify-content-center">
+    <mat-card-title>{{product.name}}</mat-card-title>
+    <mat-card-subtitle>{{product.category}}</mat-card-subtitle>
+  </mat-card-header>
+  <!--
+  <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg" alt="Photo of a Shiba Inu">
+  -->
+  <mat-card-content class="w-100 h-25 d-inline-flex justify-content-center">
+    <div>
+      Price: {{product.price | currency}}
+    </div>
+  </mat-card-content>
+  <mat-card-actions class="w-100 h-25 d-inline-flex justify-content-center">
+    <button mat-raised-button
+      (click)="inspect(product)">Inspect</button>
+    <button mat-raised-button
+     (click)="remove(product)">Remove</button>
+  </mat-card-actions>
+</mat-card>

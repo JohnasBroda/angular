@@ -1,0 +1,9 @@
+<div *ngIf="isReady">
+  <h1>Hello {{ user.firstName }} {{ user.lastName }}!</h1>
+  <button 
+    mat-raised-button
+    color="primary"
+    (click)="logout()">
+      Logout
+  </button>  
+</div>

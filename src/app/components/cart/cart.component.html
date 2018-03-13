@@ -1,0 +1,10 @@
+    <app-product-in-cart-card *ngFor="let product of products | async" (remove)="remove(product)" [product]="product">
+    </app-product-in-cart-card>
+    <div *ngIf="!(amountInCart | async)">
+        No Products in your Cart!
+    </div>
+    <button (click)="clearCart()">clear</button>
+    {{ totalPrice | async }}
+
+    <button mat-raised-button
+      (click)="checkOut()">Checkout</button>

@@ -1,0 +1,9 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import "../node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css";
+
+.floatedScrollBtn {
+    bottom: 50px;
+    right: 50px;
+    z-index: 1001;
+}

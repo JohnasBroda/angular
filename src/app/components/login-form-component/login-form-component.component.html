@@ -1,0 +1,51 @@
+<div class="row">
+    <div class="col-md-12 d-flex justify-content-center">
+        <h3>log in with credentials or providers</h3>
+    </div>
+    <div class="col-md-4 mx-auto d-flex justify-content-center">
+        <form [formGroup]="form" (ngSubmit)="loginWithEmail()">
+            <div *ngIf="form.errors?.invalidCredentials" class="alert alert-danger">
+                An Error happened : {{ form.errors.invalidCredentials.message }} !
+            </div>
+            <mat-form-field class="example-full-width px-auto">
+                <input formControlName="username" type="text" id="userName" matInput placeholder="username">
+            </mat-form-field>
+            <div *ngIf="username.touched && username.invalid" class="alert alert-danger mx-auto">
+                <div *ngIf="username.errors.required">
+                    Username is required!
+                </div>
+            </div>
+            <br>
+            <mat-form-field class="example-full-width mx-auto">
+                <input formControlName="password" type="password" id="password" matInput placeholder="password">
+            </mat-form-field>
+            <div *ngIf="password.touched && password.invalid" class="alert alert-danger mx-auto">
+                <div *ngIf="password.errors.required">
+                    Password is required!
+                </div>
+                <div *ngIf="password.errors.minlength">
+                    Password should be at least {{ password.errors.minlength.requiredLength }} characters long!
+                </div>
+                <div *ngIf="password.errors.cannotContainSpace">
+                    {{ password.errors.cannotContainSpace.errorMsg }}
+                </div>
+            </div>
+            <br>
+            <button [disabled]="form.invalid" mat-raised-button type="submit" class="">
+                Log In!
+            </button>
+            <button mat-raised-button routerLink="/register" type="button" class="">
+                Register!
+            </button>
+        </form>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 d-flex justify-conent-center">
+        <span class="mx-auto my-2">OR</span>
+    </div>
+    <button mat-raised-button color="primary" (click)="loginWithGoogle()" class="mx-auto">
+      Login with Google
+      <i class="fa fa-google"></i>
+    </button>
+</div>

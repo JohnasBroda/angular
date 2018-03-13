@@ -1,0 +1,22 @@
+<mat-card class="col-md-12 d-flex-row justify-content-center border border-primary mx-0">
+    <mat-card-header class="w-100 h-25 d-inline-flex justify-content-center">
+      <mat-card-title>{{product?.name}}</mat-card-title>
+      <mat-card-subtitle>{{product?.category}}</mat-card-subtitle>
+    </mat-card-header>
+    
+    <img mat-card-image ng-src="getImgUrl">
+    
+    <mat-card-content class="w-100 h-25 d-inline-flex justify-content-center">
+      <div>
+        Price: {{ product?.price | currency }}
+      </div>
+    </mat-card-content>
+    <mat-card-actions class="w-100 h-25 d-inline-flex justify-content-center mx-auto">
+      <button mat-raised-button class="mx-2"
+        (click)="inspect(product)">Inspect</button>
+      <button mat-raised-button class="mx-2" *ngIf="currentUser.isAdmin"
+       (click)="edit(product)">Edit</button>
+       <button mat-raised-button 
+       (click)="addToCart(product)">Add to cart</button>
+    </mat-card-actions>
+  </mat-card>
