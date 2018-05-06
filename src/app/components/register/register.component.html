@@ -108,17 +108,33 @@
             </div>
         </div>
         <div formGroupName="optional" class="w-100">
-            <mat-form-field class="px-auto my-2 col-md-12">
-                <span matPrefix class="p-1">+36 &nbsp;</span>
-                <input formControlName="phone" type="phone" id="phone" matInput placeholder="Phone">
-                <span matSuffix *ngIf="phone.dirty && phone.valid" class="fa fa-check-circle text-success p-1"></span>
-                <mat-error *ngIf="phone.touched && phone.invalid">
-                    <span *ngIf="phone.errors.pattern">
+            <span formGroupName="phone" class="d-flex">
+                <mat-form-field 
+                *ngFor="let part of phoneNumberParts"
+                class="px-1 my-1 d-inline w-25"
+                >
+                    <span matPrefix class="p-1" *ngIf="part === 'country'">+ &nbsp;</span>
+                    <input
+                        formControlName="{{part}}"
+                        type="text" id="{{part}}"
+                        matInput placeholder="{{part}}"
+                    />
+                <span matSuffix *ngIf="part.dirty && part.valid" class="fa fa-check-circle text-success p-1"></span>
+                <mat-error *ngIf="part.touched && part.invalid">
+                    <span *ngIf="part.errors?.pattern">
                     Please provide a valid phone number!
-                    <i class="fa fa-info-circle text-primary" (click)="showHidePhonePopUp()" [popover]="phonePopTemplate" popoverTitle="Correct formats are:" [outsideClick]="true" placement="right" containerClass="text-primary h5 font-weight-light"></i>
+                    <i class="fa fa-info-circle text-primary"
+                        (click)="showHidePhonePopUp()"
+                        [popover]="phonePopTemplate"
+                        popoverTitle="Correct formats are:"
+                        [outsideClick]="true"
+                        placement="right"
+                        containerClass="text-primary h5 font-weight-light">
+                    </i>
                   </span>
                 </mat-error>
             </mat-form-field>
+            </span>
         </div>
         <div class="d-flex justify-content-center">
             <button type="button" mat-raised-button color="primary" [disabled]="registerForm.pristine" (click)="registerForm.reset()">

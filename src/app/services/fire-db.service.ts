@@ -2,9 +2,10 @@ import { AngularFireDatabase } from 'angularfire2/database';
 import { Router } from '@angular/router';
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from 'angularfire2/auth';
-import { Product } from '../interfaces/Product';
 import { AngularFireList } from 'angularfire2/database/interfaces';
 import { map, first, reduce, mapTo, tap } from 'rxjs/operators';
+import { Order } from '../interfaces/order';
+import { Product } from '@store/products';
 
 @Injectable()
 export class FireDbService {
@@ -44,6 +45,15 @@ export class FireDbService {
         map(response => !response.length),
         first(),
       );
+    }
+
+    createOrder(order: Order) {
+      const ref = this.db.list('orders');
+      ref.push(order);
+    }
+
+    public async getPushKey() {
+      return await this.db.createPushId();
     }
 
   }

@@ -1,6 +1,7 @@
-<p>
-  cechkout works!
-</p>
+<button mat-raised-button *ngIf="(currentUser$ | async).isAnonymous; else ifAnonymous"
+(click)="pay()">Pay {{ totalPrice | async | currency }}</button>
 
-<button mat-raised-button
-(click)="pay()">Complete PayMent</button>
+<ng-template #ifAnonymous>
+  <span>You have to log in in order to complete the purchase!</span>
+  <button mat-raised-button (click)="navigateToLogIn()">Log In!</button>
+</ng-template>

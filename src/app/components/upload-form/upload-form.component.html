@@ -1,0 +1,48 @@
+<div class="">
+  <h2>Drop files to upload</h2>
+
+  <div
+    dropzone
+    (filesDropped)="handleDrop($event)"
+    (filesHovered)="dropZoneState($event)"
+    class="border border-primary drop-zone">
+    
+    <div
+      *ngFor="let file of uploads"
+      class="dragged-file card border border-primary">
+      <img 
+        *ngIf="file.url; else uploading"
+        [src]="file.url"
+        [attr.alt]="file.name"
+        class="card-img-top">
+      
+      <ng-template #uploading>
+        <app-spinner-container
+          style="height: 70px"
+          class="mb-2"
+          spinner="Bars"
+          color="blue"
+          size="medium"
+          display="block">
+        </app-spinner-container>
+      </ng-template>
+      
+      <div class="d-flex flex-column">
+        <span class="d-block text-center m-1">{{file.name}}</span>
+        <span class="d-block text-center m-1">{{file.size | dataSize: 'Mb' }}</span>
+        <button
+          (click)="removeFile(file)"
+          class="btn d-flex my-1 align-self-center">
+          Remove
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<label>
+  <input type="file" (change)="detectFiles($event)">
+</label>

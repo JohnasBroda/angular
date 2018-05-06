@@ -1,14 +1,23 @@
+import { User } from './../../core/store/user/model';
+import { LoginGoogle } from './../../core/store/auth/actions';
+import { IAppState } from './../../app.states';
+import { FacebookAuthService } from './../../services/facebook-auth.service';
+import { EmailAuthService } from './../../services/email-auth.service';
+import { ParamMap } from '@angular/router/src/shared';
 import { Component, OnInit, forwardRef } from '@angular/core';
-import { FireAuthService } from '../../services/fire-auth-service.service';
 import * as firebase from 'firebase/app';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute, Params } from '@angular/router';
 import { FormGroup, FormControl } from '@angular/forms/src/model';
 import { CustomValidators } from './validators';
-import { FormBuilder, Validators, AbstractControl, ValidationErrors, NG_ASYNC_VALIDATORS} from '@angular/forms';
+import { FormBuilder, Validators, AbstractControl, ValidationErrors, NG_ASYNC_VALIDATORS } from '@angular/forms';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFireDatabase } from 'angularfire2/database';
 import { Observable } from 'rxjs/Observable';
-
+import { GoogleAuthService } from '../../services/google-auth.service';
+import { IUser } from '@store/user/model';
+import { Store } from '@ngrx/store';
+import * as fromAuth from '@authState/index';
+import { AuthProvider } from 'app/services/auth.service';
 @Component({
   selector: 'app-login-form-component',
   templateUrl: './login-form-component.component.html',
@@ -16,13 +25,49 @@ import { Observable } from 'rxjs/Observable';
 })
 export class LoginFormComponent implements OnInit {
 
-  private form: FormGroup;
+  public form: FormGroup;
+  public currentUser: Observable<User>;
+  public loadingGoogleLogIn = false;
+  public loadingFacebookLogIn = false;
 
   constructor(
-    public authSvc: FireAuthService,
+    private emailAuth: EmailAuthService,
+    private facebookAuth: FacebookAuthService,
+    private googleAuth: GoogleAuthService,
+    private store: Store<IAppState>,
     private router: Router,
     private fb: FormBuilder,
-    public afAuth: AngularFireAuth, ) { }
+    private route: ActivatedRoute) {
+    this.buildForm();
+  }
+
+  ngOnInit() {
+    this.currentUser = this.store.select(fromAuth.selectUser);
+    this.route.queryParamMap.subscribe((params: ParamMap) => {
+      if (params.has('redirectTo')) {
+
+      }
+    });
+  }
+
+  loginWithFacebook() {
+    this.currentUser.subscribe((user: User) => this.loadingFacebookLogIn = user.loading);
+    this.store.dispatch(new fromAuth.LoginFacebook({ provider: AuthProvider.facebook }));
+  }
+
+  loginWithGoogle() {
+    this.currentUser.subscribe((user: User) => this.loadingGoogleLogIn = user.loading);
+    this.store.dispatch(new fromAuth.LoginGoogle({ provider: AuthProvider.google }));
+  }
+
+  loginWithEmail() {
+    const email = this.username.value;
+    const password = this.password.value;
+    const provider = AuthProvider.email;
+    const payload = { email, password, provider };
+    const event = new fromAuth.LoginEmail(payload);
+    this.store.dispatch(event);
+  }
 
   get username() {
     return this.form.get('username');
@@ -32,13 +77,13 @@ export class LoginFormComponent implements OnInit {
     return this.form.get('password');
   }
 
-  ngOnInit() {
-   this.form = this.fb.group({
+  private buildForm() {
+    this.form = this.fb.group({
       username: ['', [
         Validators.required,
         CustomValidators.cannotContainSpace
       ], [
-      ]],
+        ]],
       password: ['', [
         Validators.required,
         Validators.minLength(8),
@@ -47,19 +92,4 @@ export class LoginFormComponent implements OnInit {
       ]]
     });
   }
-
-  loginWithGoogle() {
-    this.authSvc.signInWithGooglePopUp();
-  }
-
-  loginWithEmail() {
-    this.authSvc.signInWithEmail(this.username.value, this.password.value)
-    .catch(response => {
-      const error = {
-        invalidCredentials: response
-      };
-      this.form.setErrors(error);
-    });
-  }
-
 }

@@ -19,4 +19,7 @@ export class ProductInCartCardComponent implements OnInit {
     this.removeProduct.emit(product);
   }
 
+  public inspect(product) {
+
+  }
 }

@@ -1,0 +1,15 @@
+<div class="p-2 d-flex justify-content-start text-white" 
+[ngClass]="{
+  'primary': message.style == 'bg-primary',
+  'info': message.style == 'bg-info',
+  'warning': message.style == 'bg-warning',
+  'success': message.style == 'bg-success',
+  'danger': message.style == 'bg-danger'
+}"
+ role="alert">
+  <button *ngIf="message.dismissible" (click)="dismiss(message.id)" class="align-self-end">
+    &times;
+  </button>
+  <h3 class="p-1 alert-heading">{{ message.type }}!</h3>
+  <p class="p-1">{{ message.content }}</p>
+</div>

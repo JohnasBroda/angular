@@ -1,0 +1,17 @@
+{
+    "short_name": "Apollo Project",
+    "name": "Apollo micro business application",
+    "start_url": "/",
+
+    "theme_color": "blue",
+    "background_color": "#ffffff",
+
+    "display": "standalone",
+    "orientation": "portrait",
+    "icons": [
+        
+    ],
+
+
+
+}

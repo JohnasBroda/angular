@@ -1,11 +1,16 @@
 import { PipeTransform, Pipe } from '@angular/core';
-import { Product } from './Product';
 import { SortMode } from './sort-mode';
+import { Product } from '@store/products';
 
 @Pipe({ name: 'orderBy' })
 export class OrderByPipe implements PipeTransform {
-    transform(products: Product[], sortMode: SortMode): Product[] {
-        const sorted = products.sort((a: Product, b: Product) => {
+    transform(array: any[], sortMode: SortMode): Product[] {
+
+        if (!sortMode || !sortMode.order) {
+            return array;
+        }
+
+        const sorted = array.sort((a: Product, b: Product) => {
             if (a[sortMode.property] < b[sortMode.property]) {
                 return -1;
             } else if (a[sortMode.property] > b[sortMode.property]) {
@@ -14,7 +19,7 @@ export class OrderByPipe implements PipeTransform {
                 return 0;
             }
         });
-        console.log(sorted);
+
         return sortMode.order === 'ASC' ? sorted : sorted.reverse();
     }
 }

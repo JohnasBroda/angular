@@ -1,26 +1,64 @@
+import { UploadFormComponent } from './../components/upload-form/upload-form.component';
+import { UploadService } from './../services/upload.service';
 import { Directive, Output, EventEmitter, HostListener } from '@angular/core';
+import { Upload } from '../classes/upload';
+import { Observable } from 'rxjs/Observable';
+import { OnInit } from '@angular/core/src/metadata/lifecycle_hooks';
 
 @Directive({
-  selector: '[appDropzone]'
+  // tslint:disable-next-line:directive-selector
+  selector: '[dropzone]',
+  providers: [UploadService],
 })
-export class DropzoneDirective {
+export class DropzoneDirective implements OnInit {
 
-  @Output() dropped = new EventEmitter<FileList>();
-  @Output() hovered = new EventEmitter<boolean>();
+  @Output() filesDropped = new EventEmitter<Upload[]>();
+  @Output() filesHovered = new EventEmitter<boolean>();
 
-  constructor() { }
+  // tslint:disable-next-line:no-inferrable-types
+  public autoUpload: boolean = true;
+  private uploads: Upload[] = [];
+
+  constructor(private uploadSvc: UploadService, private host: UploadFormComponent) { }
+
+  ngOnInit() {
+    this.uploadSvc.uploadComplete.subscribe(upload =>  {
+      this.filesDropped.emit(upload);
+      console.log(this.host.uploads);
+    });
+  }
 
   @HostListener('drop', ['$event'])
-  onDrop($event) {
+  private onDrop($event: DragEvent) {
+    $event.stopPropagation();
     $event.preventDefault();
-    this.dropped.emit($event.dataTransfer.files);
-    this.hovered.emit(false);
+    const files = $event.dataTransfer.files;
+    this.generateUpload(files);
+    this.uploads.forEach(upload => this.uploadSvc.pushUpload(upload));
+    this.filesHovered.emit(false);
+    this.uploads = [];
   }
 
   @HostListener('dragover', ['$event'])
   onDragOver($event) {
     $event.preventDefault();
-    this.hovered.emit(true);
+    this.filesHovered.emit(true);
   }
 
+  @HostListener('dragleave', ['$event'])
+  onDrageLeave($event) {
+    $event.preventDefault();
+    this.filesHovered.emit(false);
+  }
+
+  private generateUpload(fileList: FileList) {
+    for (let i = 0; i < fileList.length; i++) {
+      const upload = new Upload(fileList[i]);
+      upload.createdAt = fileList[i].lastModifiedDate;
+      upload.name = fileList[i].name;
+      upload.size = fileList[i].size;
+      upload.type = fileList[i].type;
+      this.uploads[i] = upload;
+    }
+  }
 }

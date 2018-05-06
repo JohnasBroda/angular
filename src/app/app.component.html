@@ -1,13 +1,18 @@
-<nav mat-tab-nav-bar id="top" class="position-sticky sticky-top" style="background-color: white">
-        <a mat-tab-link
-           *ngFor="let link of navLinks"
-           [routerLink]="link.path"
-           routerLinkActive #rla="routerLinkActive"
-           [active]="rla.isActive">
-            {{link.label}}
-          <mat-chip *ngIf="link.label === 'cart'" color="'primary'">
-            {{ amountInCart | async }}
-          </mat-chip>
-        </a>
-      </nav>
-<router-outlet></router-outlet>
+<div *ngIf="router" class="page-container">
+
+  <nav mat-tab-nav-bar id="top" class="position-sticky sticky-top header-row" style="background-color: white">
+    <a mat-tab-link *ngFor="let link of navLinks" [routerLink]="link.path" routerLinkActive #rla="routerLinkActive" [active]="rla.isActive">
+      {{link.label}}
+      <mat-chip *ngIf="link.label === 'cart'" color="'primary'">
+        {{ amountInCart | async }}
+      </mat-chip>
+    </a>
+  </nav>
+
+  <div class="main" [@animRoutes]="getPage(appOutlet)">
+    <router-outlet #appOutlet="outlet"></router-outlet>
+  </div>
+
+</div>
+
+<p-growl [(value)]="messages" baseZIndex="10000"></p-growl>

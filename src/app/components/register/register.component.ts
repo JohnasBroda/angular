@@ -1,12 +1,16 @@
+import { IAppState } from 'app/app.states';
+import { EmailAuthService } from './../../services/email-auth.service';
+import { DoCheck } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Observable } from 'rxjs/Observable';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Component, OnInit, Input, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms/src/model';
 import { CustomValidators, ValidateEmailNotTaken } from '../login-form-component/validators';
-import { FireAuthService } from '../../services/fire-auth-service.service';
 import { FireDbService } from '../../services/fire-db.service';
-import { User } from '../../interfaces/User';
 import { AngularFireDatabase } from 'angularfire2/database-deprecated';
+import { User } from '@store/user/model';
+import { Store } from '@ngrx/store';
+import * as fromAuth from '@authState/index';
 
 @Component({
   selector: 'app-register',
@@ -18,18 +22,55 @@ export class RegisterComponent implements OnInit {
   @ViewChild('password') passwordInput;
   @ViewChild('password2') passwordConfirmInput;
 
-  private registerForm: FormGroup;
+  public registerForm: FormGroup;
   public passwordFormat = 'password';
   private phonePopUpVisible = false;
-  public registerPromise: Q.Promise<{}>;
   public formSubmitted = false;
+  public phoneNumberParts = ['country', 'area', 'prefix', 'line'];
 
   constructor(
+    private emailAuth: EmailAuthService,
     public fb: FormBuilder,
-    public authSvc: FireAuthService,
-    public db: FireDbService) { }
+    public db: FireDbService,
+    private store: Store<IAppState>) { }
 
   ngOnInit() {
+    this.buildForm();
+  }
+
+  get mandatory() {
+    return this.registerForm.get('mandatory');
+  }
+
+  get firstName() {
+    return this.mandatory.get('firstName');
+  }
+
+  get lastName() {
+    return this.mandatory.get('lastName');
+  }
+
+  get email() {
+    return this.mandatory.get('email');
+  }
+
+  get pw() {
+    return this.mandatory.get('pw');
+  }
+
+  get pw2() {
+    return this.mandatory.get('pw2');
+  }
+
+  get optional() {
+    return this.registerForm.get('optional');
+  }
+
+  get phone() {
+    return this.optional.get('phone');
+  }
+
+  private buildForm() {
     this.registerForm = this.fb.group({
       mandatory: this.fb.group({
         firstName: ['', [
@@ -65,45 +106,18 @@ export class RegisterComponent implements OnInit {
         ]]
       }),
       optional: this.fb.group({
-        phone: ['', Validators.pattern('/\d{9}/')],
+        phone: this.fb.group({
+          country: this.validateMinMax(1, 2),
+          area: this.validateMinMax(2, 3),
+          prefix: this.validateMinMax(3, 3),
+          line: this.validateMinMax(4, 4),
+        })
       }),
     });
     this.registerForm.setErrors({});
   }
 
-  get mandatory() {
-    return this.registerForm.get('mandatory');
-  }
-
-  get firstName() {
-    return this.mandatory.get('firstName');
-  }
-
-  get lastName() {
-    return this.mandatory.get('lastName');
-  }
-
-  get email() {
-    return this.mandatory.get('email');
-  }
-
-  get pw() {
-    return this.mandatory.get('pw');
-  }
-
-  get pw2() {
-    return this.mandatory.get('pw2');
-  }
-
-  get optional() {
-    return this.registerForm.get('optional');
-  }
-
-  get phone() {
-    return this.optional.get('phone');
-  }
-
-  showHidePhonePopUp() {
+  public showHidePhonePopUp() {
     this.phonePopUpVisible = !this.phonePopUpVisible;
   }
 
@@ -113,27 +127,30 @@ export class RegisterComponent implements OnInit {
 
   public register() {
     this.formSubmitted = true;
-
-    const user = new User();
-    user.email = this.email.value;
-    user.firstName = this.firstName.value;
-    user.lastName = this.lastName.value;
-    user.password = this.pw.value;
-    if (this.phone.value) {
-      user.phoneNumber = this.phone.value;
-    }
-    this.registerPromise = this.authSvc.registerWithEmail(user);
-    this.registerPromise.then(response => {
-      console.log(response);
-    }, e => {
-      console.error(e);
-      this.registerForm.setErrors({
-        emailTaken: {
-          code: e.code,
-          errorMsg: e.message
-        }
-      });
-    });
+    const user = new User(
+      null,
+      this.email.value,
+      this.firstName.value + ' ' + this.lastName.value,
+      'email',
+      null,
+      true,
+      this.pw.value,
+      this.phone.value ? this.e164 : null);
+    this.store.dispatch(new fromAuth.RegisterEmail(user));
   }
 
+  private validateMinMax(min, max) {
+    return ['', [
+      Validators.required,
+      Validators.minLength(min),
+      Validators.maxLength(max),
+      Validators.pattern('[0-9]+')
+    ]];
+  }
+
+  get e164() {
+    const form = this.phone.value;
+    const num = '' + form.country + form.area + form.prefix + form.line;
+    return `+${num}`;
+  }
 }

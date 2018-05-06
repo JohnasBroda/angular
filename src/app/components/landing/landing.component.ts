@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { FireAuthService } from '../../services/fire-auth-service.service';
 
 @Component({
   selector: 'app-landing',
@@ -8,7 +7,7 @@ import { FireAuthService } from '../../services/fire-auth-service.service';
 })
 export class LandingComponent implements OnInit {
 
-  constructor(private authSvc: FireAuthService) { }
+  constructor() { }
 
   ngOnInit() {
   }

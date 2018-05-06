@@ -44,8 +44,36 @@
     <div class="col-md-12 d-flex justify-conent-center">
         <span class="mx-auto my-2">OR</span>
     </div>
-    <button mat-raised-button color="primary" (click)="loginWithGoogle()" class="mx-auto">
-      Login with Google
-      <i class="fa fa-google"></i>
-    </button>
+    <div class="col-md-12 d-flex justify-content-center">
+        <button mat-raised-button color="primary" (click)="loginWithGoogle()" class="m-1 col-md-1">
+            <span *ngIf="!loadingGoogleLogIn; else googleLogIn">
+                <i class="fa fa-google"></i>
+                Google
+            </span>
+        </button>
+        <ng-template #googleLogIn>
+            <app-spinner-container 
+                spinner="Bars"
+                color="orange"
+                size="medium"
+                display="inline">
+            </app-spinner-container>
+        </ng-template>
+    </div>
+    <div class="col-md-12 d-flex justify-content-center">
+        <button mat-raised-button color="primary" (click)="loginWithFacebook()" class="m-1 col-md-1">
+            <span *ngIf="!loadingFacebookLogIn; else facebookLogIn">
+                <i class="fa fa-facebook"></i>
+                Facebook
+            </span>
+            <ng-template #facebookLogIn>
+                <app-spinner-container 
+                spinner="Bars"
+                color="orange"
+                size="medium"
+                display="inline">
+                </app-spinner-container>
+            </ng-template>
+        </button>
+    </div>
 </div>

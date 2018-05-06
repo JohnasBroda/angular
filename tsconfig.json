@@ -14,6 +14,15 @@
     "lib": [
       "es2017",
       "dom"
-    ]
+    ],
+    "baseUrl": "src",
+    "paths": {
+      "@store/*": ["app/core/store/*"],
+      "@spinners": ["app/shared/spinners/index"],
+      "@authState/*": ["app/core/store/auth/index"],
+      "@configState/*": ["app/core/store/config/index"],
+      "@products/*": ["app/core/store/products/index"],
+      "@environments/*": ["environments/*"]
+    }
   }
 }

@@ -1,4 +1,4 @@
-export interface PaginatorEvent {
+export interface PageEvent {
     first: number;
     page: number;
     rows: number;

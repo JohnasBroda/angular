@@ -1,3 +1,4 @@
+import { ToastService } from './../../../services/toast.service';
 import { Subscription } from 'rxjs/Subscription';
 import { CartService } from './../../../services/cart.service';
 import { Component, OnInit, Input, Inject } from '@angular/core';
@@ -22,7 +23,8 @@ export class AddToCartComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: any,
     public dialogRef: MatDialogRef<any>,
     private cartSvc: CartService,
-    private fb: FormBuilder) {
+    private fb: FormBuilder,
+    private toaster: ToastService) {
       this.product = this.data.product;
     }
 
@@ -38,6 +40,7 @@ export class AddToCartComponent implements OnInit, OnDestroy {
       const productToCart = Object.assign({}, this.product, { inCart: amount });
       this.cartSvc.addProduct(productToCart);
       this.dialogRef.close(productToCart);
+      this.toaster.showSuccess();
     } else {
       this.dialogRef.close();
     }
