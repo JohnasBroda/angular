@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { FireDbService } from './fire-db.service';
-import { Product } from '../interfaces/Product';
 import { Router } from '@angular/router';
 import { NavigationExtras } from '@angular/router';
 import { CartService } from './cart.service';
-import { FireAuthService } from './fire-auth-service.service';
+import { IProduct } from '@store/products';
 
 @Injectable()
 export class ProductService {
@@ -12,10 +11,9 @@ export class ProductService {
   constructor(
     private db: FireDbService,
     private router: Router,
-    private cartSvc: CartService,
-    private authSvc: FireAuthService) {}
+    private cartSvc: CartService) {}
 
-    public editProduct(product: Product) {
+    public editProduct(product: IProduct) {
       this.router.navigate(['/products', 'edit-product', product.name]);
     }
 
@@ -23,8 +21,7 @@ export class ProductService {
       this.cartSvc.products.push(product);
     }
 
-    public inspect(product: Product) {
-      console.log(this.authSvc.currentUser);
+    public inspect(product: IProduct) {
       this.router.navigate(['/products', 'product', product.name]);
     }
 }

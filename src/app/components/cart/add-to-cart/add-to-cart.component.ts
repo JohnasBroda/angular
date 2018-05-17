@@ -1,3 +1,4 @@
+import { ToastService } from './../../../services/toast.service';
 import { Subscription } from 'rxjs/Subscription';
 import { CartService } from './../../../services/cart.service';
 import { Component, OnInit, Input, Inject } from '@angular/core';
@@ -17,16 +18,21 @@ export class AddToCartComponent implements OnInit, OnDestroy {
   public amount = 1;
   public amountGroup: FormGroup;
   public dialogSub: Subscription;
+  public imgIndex: number;
+  // tslint:disable-next-line:no-inferrable-types
+  public imgBtnsVisible: boolean = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     public dialogRef: MatDialogRef<any>,
     private cartSvc: CartService,
-    private fb: FormBuilder) {
+    private fb: FormBuilder,
+    private toaster: ToastService) {
       this.product = this.data.product;
     }
 
   ngOnInit() {
+    this.imgIndex = 0;
     this.dialogSub = this.dialogRef.backdropClick().subscribe();
     this.amountGroup = this.fb.group({
       productAmount: [ this.amount, CustomValidators.mustBeNumberValidator],
@@ -38,9 +44,20 @@ export class AddToCartComponent implements OnInit, OnDestroy {
       const productToCart = Object.assign({}, this.product, { inCart: amount });
       this.cartSvc.addProduct(productToCart);
       this.dialogRef.close(productToCart);
+      this.toaster.showSuccess();
     } else {
       this.dialogRef.close();
     }
+  }
+
+  public showPrevImg() {
+    this.imgIndex === 0 ?
+      this.imgIndex = this.product.images.length - 1 : this.imgIndex--;
+  }
+
+  public showNextImg() {
+    this.imgIndex === this.product.images.length - 1 ?
+      this.imgIndex = 0 : this.imgIndex++;
   }
 
   public increaseAmount() {

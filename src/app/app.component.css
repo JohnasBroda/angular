@@ -1,0 +1,16 @@
+.header-row {
+    height: var(--header-height);
+    margin-top: -60px;
+}
+
+.main {
+    position: relative;
+    width: 100vw;
+    height: calc(100vh - var(--header-height));
+    margin: 0 auto;
+}
+
+.page-container {
+    box-sizing: border-box;
+    padding-top: var(--header-height);
+}

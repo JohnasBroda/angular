@@ -1,20 +1,39 @@
 <mat-card class="product-card d-flex-column justify-content-center border border-primary">
+
   <mat-card-header class="w-100 h-25 d-inline-flex justify-content-center">
-    <mat-card-title>{{product.name}}</mat-card-title>
-    <mat-card-subtitle>{{product.category}}</mat-card-subtitle>
+
+    <mat-card-title>{{ product.name }}</mat-card-title>
+
+    <mat-card-subtitle>{{ product.category }}</mat-card-subtitle>
+
   </mat-card-header>
-  <!--
-  <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg" alt="Photo of a Shiba Inu">
-  -->
+
   <mat-card-content class="w-100 h-25 d-inline-flex justify-content-center">
-    <div>
-      Price: {{product.price | currency}}
+
+    <div class="col-md-12 img" (mouseenter)="imgBtnsVisible = true" (mouseleave)="imgBtnsVisible = false">
+
+      <button [hidden]="!imgBtnsVisible" (click)="showPrevImg()" class="position-absolute arrow arrow-left">
+        <span class="fa fa-angle-left"></span>
+      </button>
+
+      <ng-container *ngFor="let img of product.images; let i = index">
+        <img mat-card-image *ngIf="i === imgIndex" [src]="product.images[i]" style="max-height: 100px; object-fit:contain">
+      </ng-container>
+
+      <button [hidden]="!imgBtnsVisible" class="position-absolute arrow arrow-rigth" (click)="showNextImg()">
+        <span class="fa fa-angle-right"></span>
+      </button>
+
     </div>
+
+    <div>
+      Price: {{ product.price | currency }}
+    </div>
+
   </mat-card-content>
+
   <mat-card-actions class="w-100 h-25 d-inline-flex justify-content-center">
-    <button mat-raised-button
-      (click)="inspect(product)">Inspect</button>
-    <button mat-raised-button
-     (click)="remove(product)">Remove</button>
+    <button mat-raised-button (click)="inspect(product)">Inspect</button>
+    <button mat-raised-button (click)="remove(product)">Remove</button>
   </mat-card-actions>
 </mat-card>

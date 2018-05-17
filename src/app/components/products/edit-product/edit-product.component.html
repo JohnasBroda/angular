@@ -8,7 +8,7 @@
           <form [formGroup]="editForm" (ngSubmit)="saveChanges()" class="d-flex-column w-25 m-2">
       
               <div class="px-auto my-2 col-md-12">
-                  <mat-slider matInput formControlName="amount" min="0" max="100" step="1" value="amount.value" [thumb-label]="amount.value">
+                  <mat-slider matInput formControlName="amount" min="0" max="100" step="1" value="amount.value" [thumbLabel]="amount.value">
                   </mat-slider> {{ amount.value }}
                   <span matSuffix *ngIf="amount.dirty && amount.valid" class="fa fa-check-circle text-success p-1"></span>
                   <mat-error *ngIf="amount.touched && amount.invalid">

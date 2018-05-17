@@ -1,0 +1,208 @@
+<div class="row col-md-6 mx-auto">
+    <span class="h2 w-100 m-2">
+        <p class="text-center">Create new product</p>
+    </span>
+    <div class="col-md-12 mx-auto">
+
+        <mat-accordion class="example-headers-align">
+
+            <form
+                [formGroup]="form"
+                (ngSubmit)="uploadProducts()"
+                class="d-flex-column w-100 m-2 mx-auto">
+      
+                <div formArrayName="productsArray" class="w-100">
+
+                    <div 
+                        *ngFor="let group of productGroups; index as i"
+                        formGroupName="{{i}}">
+
+                        <mat-expansion-panel 
+                            [expanded]="step === i"
+                            (opened)="setStep(i)"
+                            hideToggle="true">
+
+                            <mat-expansion-panel-header>
+                                <mat-panel-title>{{ i + 1 }}. - Product details </mat-panel-title>
+                                <mat-panel-description>
+                                    Type your name and age
+                                    <mat-icon>account_circle</mat-icon>
+                                </mat-panel-description>
+                            </mat-expansion-panel-header>
+                                  
+                            <div class="px-auto my-2 col-md-12">
+                                <mat-slider
+                                    matInput
+                                    formControlName="amount"
+                                    min="0" max="100" step="1"
+                                    value="amount.value"
+                                    [thumbLabel]="amount.value"
+                                    class="w-100">
+                                </mat-slider> {{ amount.value }}
+                                <span 
+                                    matSuffix
+                                    *ngIf="amount.dirty && amount.valid"
+                                    class="fa fa-check-circle text-success p-1">
+                                </span>
+                                <mat-error *ngIf="amount.touched && amount.invalid">
+                                    <span *ngIf="amount.errors.required">Setting products's amount is required</span>
+                                </mat-error>
+                            </div>
+                                          
+                            <mat-form-field class="px-auto my-2 col-md-12">
+                                <mat-select
+                                    formControlName="category"
+                                    placeholder="Category">
+                                    <mat-option 
+                                        *ngFor="let category of categories"
+                                        [value]="category">
+                                        {{ category }}
+                                    </mat-option>
+                                </mat-select>
+                                <span 
+                                    matSuffix
+                                    *ngIf="category.dirty && category.valid"
+                                    class="fa fa-check-circle text-success p-1">
+                                </span>
+                                <mat-error *ngIf="category.touched && category.invalid">
+                                    <span *ngIf="category.errors.required">category is required!</span>
+                                    <span *ngIf="category.errors.cannotContainSpace">
+                                        {{ category.errors.cannotContainSpace.errorMsg }}
+                                    </span>
+                                </mat-error>
+                            </mat-form-field>
+                                        
+                            <mat-form-field class="px-auto my-2 col-md-12">
+                                <input 
+                                    type="text"
+                                    formControlName="color"
+                                    placeholder="Product color"
+                                    matInput>
+                                <span 
+                                    matSuffix
+                                    *ngIf="color.dirty && color.valid"
+                                    class="fa fa-check-circle text-success p-1">
+                                </span>
+                                <mat-error *ngIf="color.touched && color.invalid">
+                                    <span *ngIf="color.errors.required">Product color is required!</span>
+                                </mat-error>
+                            </mat-form-field>
+                                        
+                            <mat-form-field class="px-auto my-2 col-md-12">
+                                <input 
+                                    type="text"
+                                    formControlName="name"
+                                    placeholder="Product name"
+                                    matInput>
+                                <span 
+                                    matSuffix
+                                    *ngIf="name.dirty && name.valid"
+                                    class="fa fa-check-circle text-success p-1">
+                                </span>
+                                <mat-error *ngIf="name.touched && name.invalid">
+                                    <span *ngIf="name.errors.required">Product name is required!</span>
+                                </mat-error>
+                            </mat-form-field>
+                                        
+                            <mat-form-field class="px-auto my-2 col-md-12">
+                                <input
+                                    type="number"
+                                    formControlName="price"
+                                    placeholder="Product price"
+                                    matInput>
+                                <span 
+                                    matSuffix
+                                    *ngIf="price.dirty && price.valid"
+                                    class="fa fa-check-circle text-success p-1">
+                                </span>
+                                <mat-error *ngIf="price.touched && price.invalid">
+                                    <span *ngIf="price.errors.required">Product price is required!</span>
+                                </mat-error>
+                            </mat-form-field>
+                                        
+                            <mat-form-field class="px-auto my-2 col-md-12">
+                                <input 
+                                    type="text"
+                                    formControlName="size"
+                                    placeholder="Product size"
+                                    matInput>
+                                <span
+                                    matSuffix
+                                    *ngIf="size.dirty && size.valid"
+                                    class="fa fa-check-circle text-success p-1"></span>
+                                <mat-error *ngIf="size.touched && size.invalid">
+                                    <span *ngIf="size.errors.required">Product size is required!</span>
+                                </mat-error>
+                            </mat-form-field>
+                                        
+                            <mat-form-field class="px-auto my-2 col-md-12">
+                                <mat-select
+                                    formControlName="subCategory"
+                                    placeholder="Sub category">
+                                    <mat-option
+                                        *ngFor="let category of subCategories"
+                                        [value]="subCategory">
+                                        {{ category }}
+                                    </mat-option>
+                                </mat-select>
+                                <span
+                                    matSuffix 
+                                    *ngIf="subCategory.dirty && subCategory.valid"
+                                    class="fa fa-check-circle text-success p-1">
+                                </span>
+                                <mat-error *ngIf="subCategory.touched && subCategory.invalid">
+                                    <span *ngIf="subCategory.errors.required">Sub category is required!</span>
+                                </mat-error>
+                            </mat-form-field>
+                              
+                            <mat-form-field class="px-auto my-2 col-md-12">
+                                <input type="text" formControlName="id" matInput>
+                                <span matSuffix class="fa fa-check-circle text-success p-1"></span>
+                            </mat-form-field>
+                                        
+                            <div class="col-md-12 d-flex justify-content-center my-2">
+                                Pictures
+                                <div class="d-flex w-100 h-100">
+                                    <app-upload-form (uploadFiles)="onUpload($event, i)"></app-upload-form>
+                                    <input 
+                                        type="text"
+                                        formControlName="images"
+                                        hidden="true">
+                                </div>
+                            </div>
+        
+                            <mat-action-row>
+                                <button mat-button color="warn" (click)="prevStep()">Previous</button>
+                                <button mat-button color="primary" (click)="nextStep()">End</button>
+                            </mat-action-row>
+
+                        </mat-expansion-panel>
+
+                    </div> <!-- END OF PRODUCT GROUP ITEM -->   
+
+                </div> <!-- END OF FORM ARRAY! -->
+
+                <div class="col-md-12 d-flex justify-content-center my-2">
+                    <button
+                        mat-fab type="button"
+                        (click)="addProductGroup()">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                </div>
+
+                <div class="col-md-12 d-flex justify-content-center my-2">
+                    <button 
+                        [disabled]="form.invalid"
+                        mat-raised-button
+                        type="submit">
+                        Add new Product
+                    </button>
+                </div>
+        
+            </form>
+
+        </mat-accordion>
+        
+    </div>      
+
+</div>

@@ -1,22 +1,57 @@
-<mat-card class="col-md-12 d-flex-row justify-content-center border border-primary mx-0">
-    <mat-card-header class="w-100 h-25 d-inline-flex justify-content-center">
-      <mat-card-title>{{product?.name}}</mat-card-title>
-      <mat-card-subtitle>{{product?.category}}</mat-card-subtitle>
+<mat-card class="col-md-12 d-flex-row justify-content-center border border-primary mx-0 p-1 h product-card">
+
+  <ng-container *ngIf="product; else loading">
+
+    <mat-card-header class="col-md-12 h-25 d-flex justify-content-center">
+
+      <mat-card-title>
+        {{ product.name }}
+      </mat-card-title>
+
+      <mat-card-subtitle>
+        {{ product.category }}
+      </mat-card-subtitle>
+
     </mat-card-header>
     
-    <img mat-card-image ng-src="getImgUrl">
-    
-    <mat-card-content class="w-100 h-25 d-inline-flex justify-content-center">
-      <div>
+    <mat-card-content class="row col-md-12 product-img d-block m-0">
+
+      <app-product-image [urls]="product.images"></app-product-image>
+      
+      <span class="col-md-12 d-flex justify-content-center">
         Price: {{ product?.price | currency }}
-      </div>
+      </span>
+
     </mat-card-content>
-    <mat-card-actions class="w-100 h-25 d-inline-flex justify-content-center mx-auto">
+
+    <mat-card-actions class="col-md-12 h-25 d-flex justify-content-center mx-auto my-0">
+
       <button mat-raised-button class="mx-2"
-        (click)="inspect(product)">Inspect</button>
+        (click)="inspect(product)">
+        Inspect
+      </button>
+
       <button mat-raised-button class="mx-2" *ngIf="currentUser.isAdmin"
-       (click)="edit(product)">Edit</button>
-       <button mat-raised-button 
-       (click)="addToCart(product)">Add to cart</button>
+        (click)="edit(product)">
+        Edit
+      </button>
+
+      <button mat-raised-button 
+        (click)="addToCart(product)">
+        Add to cart
+      </button>
+
     </mat-card-actions>
-  </mat-card>
+
+  </ng-container>
+
+  <ng-template #loading>
+    <app-spinner-container
+      spinner="Bars"
+      color="red"
+      size="large"
+      display="block">
+    </app-spinner-container>
+  </ng-template>
+
+</mat-card>

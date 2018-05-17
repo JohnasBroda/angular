@@ -1,10 +1,28 @@
-    <app-product-in-cart-card *ngFor="let product of products | async" (remove)="remove(product)" [product]="product">
-    </app-product-in-cart-card>
-    <div *ngIf="!(amountInCart | async)">
-        No Products in your Cart!
-    </div>
-    <button (click)="clearCart()">clear</button>
-    {{ totalPrice | async }}
+<div *ngFor="let product of products | async">
+  <p>Product in your cart</p>
+  <div class="ui-g-12 ui-md-3" style="text-align:center">
+    <img src="assets/showcase/images/demo/car/{{car.brand}}.png">
+  </div>
+  <div class="ui-g-12 ui-md-9 car-details">
+    <div class="ui-g">
+      <div class="ui-g-2 ui-sm-6">Name: </div>
+      <div class="ui-g-10 ui-sm-6">{{product.name}}</div>
 
-    <button mat-raised-button
-      (click)="checkOut()">Checkout</button>
+      <div class="ui-g-2 ui-sm-6">CAtegory: </div>
+      <div class="ui-g-10 ui-sm-6">{{product.category}}</div>
+
+      <div class="ui-g-2 ui-sm-6">Price per unit: </div>
+      <div class="ui-g-10 ui-sm-6">{{product.price}}</div>
+
+      <div class="ui-g-2 ui-sm-6">Amount: </div>
+      <div class="ui-g-10 ui-sm-6">{{product.inCart}}</div>
+    </div>
+  </div>
+</div>
+<p>Value of the cart: {{ totalPrice | async }}</p>
+<div *ngIf="!(amountInCart | async)">
+  No Products in your Cart!
+</div>
+
+<button (click)="clearCart()">clear</button>
+<button mat-raised-button (click)="checkOut()">Checkout</button>

@@ -1,0 +1,78 @@
+<mat-sidenav-container
+  class="sidenav-container"
+  (backdropClick)="drawer.close()">
+
+  <mat-sidenav
+    #drawer
+    class="sidenav"
+    fixedInViewport="true"
+    disableClose="false"
+    [style.display]="(isHandset | async)!.matches ? 'block' : 'none'"
+    [attr.role]="isHandset ? 'dialog' : 'navigation'"
+    [mode]="(isHandset | async)!.matches ? 'over' : 'side'"
+    [opened]="!(isHandset | async)!.matches"
+    (keydown.escape)="drawer.close()">
+
+  <ng-container *ngIf="(isHandset | async)!.matches">
+
+    <mat-toolbar color="primary">Menu</mat-toolbar>
+
+    <mat-sidenav-content>
+
+      <mat-nav-list>
+        <a *ngFor="let link of navLinks"
+          mat-list-item 
+          [routerLink]="link.path"
+          routerLinkActive
+          #rla="routerLinkActive">
+          {{link.label}}
+          <mat-chip *ngIf="link.label === 'cart'" color="'primary'">
+            {{ amountInCart | async }}
+          </mat-chip>
+        </a>
+      </mat-nav-list>
+
+    </mat-sidenav-content>
+    
+  </ng-container>
+
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+
+    <mat-toolbar color="primary">
+      <button
+        type="button"
+        aria-label="Toggle sidenav"
+        mat-icon-button
+        (click)="drawer.toggle()"
+        *ngIf="(isHandset | async)!.matches">
+        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+      </button>
+
+      <span *ngIf="!(isHandset | async)!.matches">
+
+        <nav mat-tab-nav-bar
+          id="top"
+          class="position-sticky sticky-top header-row"
+          style="background-color: white">
+          <a mat-tab-link
+            *ngFor="let link of navLinks"
+            [routerLink]="link.path"
+            routerLinkActive
+            #rla="routerLinkActive"
+            [active]="rla.isActive">
+            {{link.label}}
+            <mat-chip *ngIf="link.label === 'cart'" color="'primary'">
+              {{ amountInCart | async }}
+            </mat-chip>
+          </a>
+        </nav>
+
+      </span>
+
+    </mat-toolbar>
+
+  </mat-sidenav-content>
+
+</mat-sidenav-container>

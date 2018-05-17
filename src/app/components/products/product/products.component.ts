@@ -1,30 +1,22 @@
+import { IConfigState } from './../../../core/store/config/model';
+import { environment } from './../../../../environments/environment.prod';
+import { QueryConfig } from './../../../core/store/products/reducer';
+import { IAppState } from 'app/app.states';
 import { ActivatedRoute, Router, ParamMap, NavigationExtras, Params } from '@angular/router';
 import { FilterByPipe } from './../../../interfaces/filterBy-pipe';
 import { sortModes } from './sort-modes';
 import { PaginatorPipe } from './../../../interfaces/paginator-pipe';
 import { OrderByPipe } from './../../../interfaces/orderBy-pipe';
-import { PaginatorEvent } from './../../../interfaces/paginatorEvent';
-import { Observable } from 'rxjs/Observable';
-import {PageScrollConfig, PageScrollInstance} from 'ng2-page-scroll';
 import { FormBuilder, FormControl } from '@angular/forms';
-import { selector } from 'rxjs/operator/publish';
 import { FirebaseListObservable } from 'angularfire2/database-deprecated';
-import { Product } from '../../../interfaces/Product';
-import { Component, OnInit, Input, EventEmitter, SimpleChanges, KeyValueDiffers, Inject } from '@angular/core';
+import { Component, OnInit, Input, EventEmitter, SimpleChanges, KeyValueDiffers, Inject, ViewChildren, OnDestroy } from '@angular/core';
 import { FireDbService } from '../../../services/fire-db.service';
 import { FirebaseListFactoryOpts } from 'angularfire2/database-deprecated/interfaces';
-import { FireAuthService } from '../../../services/fire-auth-service.service';
 import { ProductService } from '../../../services/product.service';
 import { PageEvent, MatAutocompleteSelectedEvent, MatOptionSelectionChange, MatSelect, MatSelectChange } from '@angular/material';
-import { OnDestroy, OnChanges, DoCheck } from '@angular/core/src/metadata/lifecycle_hooks';
 import { ScrollSvc } from '../../../services/scroll-svc.service';
 import { AddToCartComponent } from '../../cart/add-to-cart/add-to-cart.component';
 import { ComponentType } from '@angular/core/src/render3';
-import { Subscription } from 'rxjs/Subscription';
-import { User } from '../../../interfaces/User';
-
-import { SimpleSmoothScrollService } from 'ng2-simple-smooth-scroll';
-import { SimpleSmoothScrollOption } from 'ng2-simple-smooth-scroll';
 import {
   startWith,
   map,
@@ -41,46 +33,91 @@ import {
   filter,
   distinct
 } from 'rxjs/operators';
+import { TrackByFunction } from '@angular/core';
 import { SortMode } from '../../../interfaces/sort-mode';
-import { PageScrollService } from 'ng2-page-scroll';
 import { AngularFireStorage } from 'angularfire2/storage';
-import { useAnimation } from '@angular/core/src/animation/dsl';
+import { IProduct,
+         Product,
+         IProductsState,
+         selectProductState,
+         selectProducts,
+         initialState } from '@store/products';
+import { IUser } from '@store/user/model';
+import { Store } from '@ngrx/store';
+import * as fromProducts from '@store/products/index';
+import * as fromConfig from '@configState/index';
+import { HttpClient } from '@angular/common/http';
+import { selectProductConfig, IProductConfig } from '@store/config';
+import { Checkbox } from 'primeng/checkbox';
+import { state, style, transition, trigger, animate, query, group } from '@angular/animations';
+import { Observable, Subscription } from 'rxjs';
+import { displayModeOptions } from './display-mode-options';
+import { BreakpointState, Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-product',
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.css'],
   providers: [OrderByPipe, PaginatorPipe, FilterByPipe],
-  animations: [ ],
+  animations: [
+    trigger('sideNavToggle', [
+      transition('hide => show', [
+        group([
+          query('.sidenav', [
+            style({
+              opacity: 0,
+              width: 0,
+            }),
+            animate('600ms ease-in')
+          ]),
+          query('.main', [
+            style({ 'margin-left': 0 }),
+            animate('600ms ease-in',
+              style({ 'margin-left': '25vw' })
+            )
+          ]),
+        ]),
+      ]),
+      transition('show => hide', [
+        group([
+          query('.sidenav', [
+            animate('600ms ease-out',
+              style({
+                opacity: 0,
+                width: 0,
+            }))
+          ]),
+          query('.main', [
+            style({ 'margin-left': '25vw' }),
+            animate('600ms ease-out')
+          ]),
+        ])
+      ]),
+    ]),
+  ],
 })
 export class ProductComponent implements OnInit, OnDestroy {
   [x: string]: any;
-  public products: Product[];
   public productsCount: Observable<number>;
-  public productCategories: string[];
+  public productCategories$: Observable<string[]>;
   public pageLinkSize: Observable<number>;
   public filteredProducts$: Observable<any>;
   public filteredProducts: Product[];
   public pageSizeOptions: number[] = [5, 10, 25, 50, 100];
   public isScrollable: Observable<boolean>;
   public scrollSub: Subscription;
-  public currentUser: User = new User();
-  public isReady = false;
+  public currentUser: IUser = new IUser();
   public sortModes = sortModes;
-  public pageEvent: PaginatorEvent = {
-    first: 0,
-    page: 0,
-    rows: 50,
-    pageCount: 10
-  };
-  public appliedSortMode: SortMode;
+  public pageEvent: PageEvent;
+  public productState: Observable<IProductsState>;
+  public sortMode: SortMode;
   public scrollY: number;
+  private infiniteScrollable: boolean;
   public isActive = false;
-  public sideNavState = 'inactive';
-  public mainState = 'expanded';
   public filteredLength = 0;
   public filterPriceRange: number[] = [0, 100];
-  public filterCategories: string[];
+  public filterCategories: {} = {};
+  public allFilters: {};
   public gridOfThree = ['col-md-3', 'm-3'];
   public gridOfFour = ['col-md-2', 'm-5'];
   public gridOfTwo = ['col-md-4', 'm-4'];
@@ -91,75 +128,134 @@ export class ProductComponent implements OnInit, OnDestroy {
     'text-primary',
     'border-primary'
   ];
+  public displayModeOptions = displayModeOptions;
+  public isHandset: Observable<BreakpointState> = this.breakpointObserver.observe(Breakpoints.Handset);
+  public filterNavBtnPosition;
   public searchControl: FormControl;
   public searchInput = '';
   private navigationExtras: NavigationExtras = {
     queryParamsHandling: 'merge',
     skipLocationChange: true,
   };
-  public filteredOptions: Observable<string[]>;
+
+  public filters: {};
+  public typeAheadResults: Observable<any>;
   public options: string[] = [];
+  private productsQuery: QueryConfig;
+
+  public typeAheadLoading = false;
+  private done: boolean;
+  private loading: boolean;
+  public configState: Observable<IProductConfig>;
+  public filterToggles: string[] = [];
+  public showSideNav = false;
+  public filterUpdateCount: number;
+
+  @ViewChildren(Checkbox) checkBoxes: Checkbox[];
 
   constructor(
-    private db: FireDbService,
+    private http: HttpClient,
+    private store: Store<IAppState>,
     private router: Router,
     private storage: AngularFireStorage,
-    private smooth: SimpleSmoothScrollService,
     private route: ActivatedRoute,
-    private authSvc: FireAuthService,
     private productSvc: ProductService,
     public scrollSvc: ScrollSvc,
+    private breakpointObserver: BreakpointObserver,
     private fb: FormBuilder,
-    public orderByPipe: OrderByPipe,
-    public filterByPipe: FilterByPipe,
     public paginatorPipe: PaginatorPipe) {
     this.searchControl = this.fb.control([
       this.searchInput,
     ]);
-  }
-
-  async ngOnInit() {
-    this.getProducts().subscribe((products: Product[]) => {
-      this.products = products;
-      this.route.queryParams.subscribe((response: ParamMap) => {
-        this.queryParams = response;
-      });
-      this.initList();
-
-      this.getSearchOptions();
-      this.getProductCategories();
-
-      this.filteredOptions = this.searchControl.valueChanges.pipe(
-        startWith(''),
-        map(x => x ? x : ''),
-        map((input: string) => this.getFilterOptions(input)),
-      );
-      this.isScrollable = this.scrollSvc.watchScrollPosition().pipe(
-        map((ev: any) => ev = ev.path[1].scrollY ? true : false),
-      );
-      this.isReady = true;
+    this.productState = this.store.select<IProductsState>(selectProductState);
+    this.configState =  this.store.select<IProductConfig>(selectProductConfig)
+                                  .pipe(
+                                    tap(filters => this.getFilterCategories(filters)),
+                                  );
+    this.isHandset.subscribe(media => {
+      this.filterNavBtnPosition = media.matches ? 'align-self-end' : 'align-self-start';
     });
   }
 
-  public onSortChange() {
-    this.filteredProducts = this.orderByPipe.transform(this.filteredProducts, this.appliedSortMode);
-    this.filteredProducts = this.forceArrayBindingRefresh(this.filteredProducts);
+  get sideNavState() {
+    return this.showSideNav ? 'show' : 'hide';
   }
 
-  private order(products: Product[]) {
-    if (this.appliedSortMode) {
-      products = this.orderByPipe.transform(products, this.appliedSortMode);
-      products = this.forceArrayBindingRefresh(products);
+  async ngOnInit() {
+    this.store.dispatch(new fromConfig.GetProductFilters());
+    this.store.select(fromProducts.selectProductState)
+              .subscribe((state: IProductsState) => {
+                this.productsQuery = state.query;
+                this.filters = state.query.filters;
+                this.done = state.done;
+                this.loading = state.loading;
+
+                // if infinite scroll is off use the default pageEvent
+                this.pageEvent = state.infiniteScroll ? null : state.pageEvent;
+                this.infiniteScrollable = state.infiniteScroll;
+    });
+    this.route.queryParams.subscribe((response: ParamMap) => this.queryParams = response);
+
+    this.typeAheadResults = this.searchControl.valueChanges.pipe(
+      distinctUntilChanged(),
+      debounceTime(500),
+      map(x => x ? x : ''),
+      tap(() => this.typeAheadLoading = true),
+      switchMap(searchTerm => this.getTypeAheadResults(searchTerm)),
+      tap(() => this.typeAheadLoading = false),
+    );
+    this.isScrollable = this.scrollSvc.watchScrollPosition().pipe(
+      map((ev: any) => ev = ev.path[1].scrollY ? true : false),
+      tap(bool => console.log(bool))
+    );
+    this.getProducts();
+    this.allFilters = this.filterCategories;
+  }
+
+  private getFilterCategories(filterConfig: IProductConfig) {
+    this.filterUpdateCount = filterConfig.filterUpdateCount;
+
+    const filters = filterConfig.filters;
+    for (const filterKey in filters) {
+      if (filters.hasOwnProperty(filterKey) && filters[filterKey]) {
+        this.filterToggles.push(filterKey);
+        const filterGrp: {}[] = filters[filterKey];
+        const flatFilters = filterGrp.map(val => val['name']);
+        this.filterCategories[filterKey] = flatFilters;
+      }
     }
-    return products;
   }
 
-  private forceArrayBindingRefresh(array: any[]) {
-    // force angular to notice changes in the array
-    const length = array.length;
-    array.push(null);
-    array = array.slice(0, length);
-    return array;
+  public scrollHandler(position: 'top' | 'bottom') {
+    if (!this.infiniteScrollable || this.done || this.loading) {
+      return;
+    }
+
+    if (position === 'bottom') {
+      this.store.dispatch(new fromProducts.LoadProducts(this.productsQuery));
+    }
+  }
+
+  public togglePaginationMode() {
+    this.infiniteScrollable = this.infiniteScrollable ?  false : true;
+    this.pageEvent = this.pageEvent ? null : {
+      pageIndex: 0,
+      pageSize: 50,
+      length: 0,
+    };
+    this.store.dispatch(new fromProducts.UpdateState({
+      infiniteScroll: this.infiniteScrollable,
+      pageEvent: this.pageEvent
+    }));
+  }
+
+  public pageEventHandler(event) {
+    if (this.infiniteScrollable) {
+      return;
+    }
+
+    this.pageEvent = event;
+    this.store.dispatch(new fromProducts.LoadProducts(this.productsQuery));
   }
 
   public onInspect(product: Product) {
@@ -170,133 +266,109 @@ export class ProductComponent implements OnInit, OnDestroy {
     this.productSvc.editProduct(product);
   }
 
-  public pageEventHandler(event) {
-    this.pageEvent = event;
-    this.filteredProducts$ = Observable.from(this.filteredProducts$).pipe(
-      map((products: Product[]) => this.paginatorPipe.transform(products, event),
-      ));
-  }
-
   private getProducts() {
-    return this.db.getProducts();
+    this.store.dispatch(new fromProducts.LoadProducts(this.productsQuery));
   }
 
-  public getProductCategories() {
-    Observable.of(this.products).pipe(
-      mergeMap(val => Observable.from(val)),
-      map((product: Product) => product.category),
-      distinct(),
-      toArray(),
-      tap((y: string[]) => this.productCategories = y),
-      tap((array: string[]) => this.filterCategories = array),
-      take(1)
-    ).subscribe();
+  public trackById: TrackByFunction<Product> = (index: number, item: Product) => item.id;
+
+  public onSlideEnd(event) {
+    setTimeout(() => {
+      this.productsQuery = {
+        ...this.productsQuery,
+        field: 'price',
+        cursor: null,
+        operators: ['>=', '<='],
+        criterias: [ event.values[0], event.values[1] ]
+      };
+      this.store.dispatch(new fromProducts.LoadProducts(this.productsQuery));
+    }, 500);
   }
 
-  public onSlideEnd() {
-    setTimeout(() => this.applyFilters(), 500);
+  public onOptionSelected(option) {
+    console.log(option);
+    this.searchControl.setValue(option.term);
+    this.productsQuery = {
+      ...this.productsQuery,
+      cursor: null,
+      searchTerm: option.term
+    };
+    this.store.dispatch(new fromProducts.LoadProducts(this.productsQuery));
   }
-
-  public onSlideChange(event) {
-    this.filterPriceRange[0] = event.values[0];
-    this.filterPriceRange[1] = event.values[1];
-    this.onSlideEnd();
-  }
-
-  public onSearchInput(input: string) {
-    this.searchInput = this.searchControl.value[0] ? this.searchControl.value : '';
-    this.applyFilters();
-  }
-
-  public onCategoriesChange() {
-    this.applyFilters();
-  }
-
-  public applyFilters() {
-    this.filteredProducts$ = Observable.of(this.products).pipe(
-      map((products: Product[]) => this.filterByPipe.transform(products, this.searchInput)),
-      mergeMap(val => Observable.from(val)),
-      filter((product: Product) => this.filterByPrice(product)),
-      filter((product: Product) => this.filterByCategory(product)),
-      toArray(),
-      map((products: Product[]) => this.order(products)),
-      tap((products: Product[]) => this.filteredProducts = products),
-      tap(array => this.updatePaginator(array)),
-    );
-    this.filteredProducts$.subscribe();
-  }
-
-  private initList() {
-    this.filteredProducts = this.products;
-    this.updatePaginator(this.products);
-  }
-
 
   public onEnter(event: KeyboardEvent) {
     this.getFilterOptions((event.target as HTMLInputElement).value);
   }
 
-  private filterByCategory(product: Product) {
-    return this.filterCategories.includes(product.category) ? true : false;
+  public onFilterChange(checked: boolean, filterGrp: string, filterName: string) {
+    const filteredBoxes = this.checkBoxes.filter(ckBox => ckBox.name === filterGrp);
+
+    if (!filterName && checked) {
+      filteredBoxes.forEach((box, i) => {
+        box.checked = true;
+        // skipping toggle all ckBox
+        if (i !== 0) {
+          // preventing value duplications
+          if ( !(this.filterCategories[filterGrp] as string[]).includes(box.value) ) {
+            (this.filterCategories[filterGrp] as string[]).push(box.value);
+          }
+        }
+      });
+    } else if (!filterName && !checked) {
+      filteredBoxes.forEach(box => box.checked = false);
+      this.filterCategories[filterGrp] = [];
+    }
+
+    this.store.dispatch(new fromProducts.FilterChanged({
+      ...this.filterCategories,
+    }));
   }
 
-  private filterByPrice(product: Product) {
-    const extras = {
-      fromPrice: this.filterPriceRange[ 0 ],
-      toPrice: this.filterPriceRange[ 1 ],
-    };
-    this.navigationExtras.queryParams ?
-      Object.assign(this.navigationExtras.queryParams, extras) :
-      this.navigationExtras.queryParams = extras;
-    console.log(this.navigationExtras);
-    this.router.navigate(['/products', this.navigationExtras]);
-    return (product.price >= this.filterPriceRange[0] && this.filterPriceRange[1] >= product.price) ? true : false;
-  }
+  // private filterByPrice(product: IProduct) {
+  //   const extras = {
+  //     fromPrice: this.filterPriceRange[0],
+  //     toPrice: this.filterPriceRange[1],
+  //   };
+  //   this.navigationExtras.queryParams ?
+  //     Object.assign(this.navigationExtras.queryParams, extras) :
+  //     this.navigationExtras.queryParams = extras;
+  //   console.log(this.navigationExtras);
+  //   this.router.navigate(['/products', this.navigationExtras]);
+  //   return (product.price >= this.filterPriceRange[0] && this.filterPriceRange[1] >= product.price) ? true : false;
+  // }
 
-  private updatePaginator(array: any[]) {
-    this.productsCount = Observable.of(array.length);
-    const total = Math.ceil(array.length / this.pageEvent.rows) > 5 ? 5 : Math.ceil(array.length / this.pageEvent.rows);
+  // tslint:disable-next-line:no-shadowed-variable
+  private updatePaginator(count: number) {
+    this.productsCount = Observable.of(count);
+    const total = Math.ceil(count / this.pageEvent.pageSize) > 5 ? 5 : Math.ceil(count / this.pageEvent.pageSize);
     this.pageLinkSize = Observable.of(total);
   }
 
   public getFilterOptions(input: string): string[] {
     const filtered = this.options.filter((option: string) =>
-    option.toLowerCase().startsWith(input.toLowerCase()));
+      option.toLowerCase().startsWith(input.toLowerCase()));
     return input.length ? filtered : [''].concat(filtered);
   }
 
-  private getSearchOptions() {
-    this.products.forEach((product: {}) => {
-      const entries: any[] = Object.values(product);
-      entries.forEach(entry => {
-        if (this.options.indexOf(entry) === -1 &&
-          !entry.toString().startsWith('prod-') && isNaN(entry)) {
-          this.options.push(entry);
-        }
-      });
-    });
-  }
-
-  public toggleSideNav() {
-    console.log(this.sideNavState);
-    console.log(this.mainState);
-    this.mainState = this.mainstate === 'expanded' ? 'collapsed' : 'expanded';
-    this.sideNavState = this.sideNavState === 'inactive' ? 'active' : 'inactive';
-    console.log(this.sideNavState);
-    console.log(this.mainState);
+  private getTypeAheadResults(searchTerm: string) {
+    if (searchTerm.length) {
+      const url = `${environment.functionsURL.api}/typeAhead`;
+      const body = { term: searchTerm, collection: 'products' };
+      console.log(searchTerm);
+      console.log(body);
+      return this.http.post(url, body);
+    } else {
+      return Observable.of([]);
+    }
   }
 
   public updateUrl(queryParam: any) {
 
   }
 
-  public scrollToTop() {
-    this.smooth.smoothScrollToTop(new SimpleSmoothScrollOption(600, 'easeInQuint'));
-  }
-
   ngOnDestroy() {
     if (this.currentUser) {
-      this.authSvc.signOut();
+      // this.authSvc.signOut();
     }
   }
 }

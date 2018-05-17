@@ -1,19 +1,79 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="null-overflow">
+
 <head>
   <meta charset="utf-8">
-  <title>TestProject</title>
+  <title>Apollo</title>
   <base href="/">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous">
   <!-- ICON SETS -->
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <link rel="manifest" href="/manifest.json">
+
+  <script src="https://js.stripe.com/v3/"></script>
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#f48c5b">
+
+  <style type="text/css">
+    /* default .loading styles, .loading should be invisible, opacity: 0, z-index: -1 */
+
+    #appLoading {
+      opacity: 0;
+      transition: opacity .8s ease-in-out;
+      position: fixed;
+      height: 100%;
+      width: 100%;
+      top: 0;
+      left: 0;
+      background: #000;
+      z-index: -1;
+    }
+
+    /* .loading screen is visible when app is not bootstrapped yet, my-app is empty */
+
+    app-root:empty+#appLoading {
+      opacity: 1;
+      z-index: 100;
+    }
+
+    .splash img {
+      object-fit: contain;
+    }
+
+    .splash h1 {
+      color: white;
+      text-align: center;
+      margin: 1rem 0;
+    }
+
+  </style>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1976d2">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1976d2">
 </head>
+
 <body>
   <app-root></app-root>
+
+  <div id="appLoading" class="splash">
+    <img src="/assets/backgrounds/angular-firebase.png" width="100%" height="60%" alt="Apollo PWA logo">
+    <h1>Apollo</h1>
+  </div>
+
+  <noscript>
+    <p>
+      Sorry, JavaScript must be enabled to use this app
+    </p>
+  </noscript>
 </body>
+
 </html>

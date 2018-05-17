@@ -12,5 +12,10 @@ export const environment = {
     projectId: 'angular-test-b0fcc',
     storageBucket: 'angular-test-b0fcc.appspot.com',
     messagingSenderId: '536831083558'
-  }
+  },
+  stripePublishable: 'pk_test_5Z7xPgnvEmmsehTT1AYxvBrt',
+  functionsURL: {
+    typeAhead: 'https://us-central1-angular-test-b0fcc.cloudfunctions.net/typeAhead',
+    api: 'https://us-central1-angular-test-b0fcc.cloudfunctions.net/app',
+  },
 };

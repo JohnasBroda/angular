@@ -1,42 +1,42 @@
-import { User } from './../../interfaces/User';
-import { FireAuthService } from '../../services/fire-auth-service.service';
+import { IAppState } from './../../app.states';
 import { selector } from 'rxjs/operator/publish';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import * as firebase from 'firebase/app';
 import { Subscription } from 'rxjs/Subscription';
 import { AngularFireDatabase } from 'angularfire2/database';
-import { OnDestroy, AfterViewInit } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ParamMap } from '@angular/router/src/shared';
 import { MatSnackBar, MatSnackBarConfig, SimpleSnackBar, MatSnackBarRef } from '@angular/material';
-
+import { IUser, User } from '@store/user/model';
+import { Store } from '@ngrx/store';
+import * as fromAuth from '@authState/index';
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
   styleUrls: ['./user.component.css']
 })
 export class UserComponent implements OnInit, OnDestroy {
-  private user;
-  private isReady = false;
+  private user: User;
+  public isReady = false;
   private userSub: Subscription;
   public queryParams: ParamMap;
   private snackBarref: MatSnackBarRef<SimpleSnackBar>;
 
   constructor(
-    public authSvc: FireAuthService,
     private db: AngularFireDatabase,
     private router: Router,
+    private store: Store<IAppState>,
     private route: ActivatedRoute,
     private snackBar: MatSnackBar) { }
 
   ngOnInit() {
     const snackBarDuration = 4000;
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    this.user = currentUser;
+    this.store.select(fromAuth.selectUser).subscribe(user => this.user = user);
     this.route.queryParamMap.subscribe((response: ParamMap) => {
       this.queryParams = response;
-      if (currentUser || !this.authSvc.currentUser) {
+      if (currentUser || this.user) {
         if (this.queryParams.has('isNewUser') && this.queryParams.get('isNewUser')) {
           const newUserSnackBarConfig: MatSnackBarConfig = {
             duration: snackBarDuration,
@@ -63,14 +63,6 @@ export class UserComponent implements OnInit, OnDestroy {
           }
         }, snackBarDuration + 500);
         this.isReady = true;
-      } else { // in case of app reload
-        this.userSub = this.authSvc.afAuth.authState.
-          subscribe((user: firebase.User) => {
-            this.user = this.authSvc.currentUser;
-            this.isReady = true;
-          }, error => {
-            console.log(error.message);
-          });
       }
     });
   }
@@ -85,6 +77,6 @@ export class UserComponent implements OnInit, OnDestroy {
     if (this.userSub) {
       this.userSub.unsubscribe();
     }
-    this.authSvc.signOut();
+    this.store.dispatch(new fromAuth.Logout());
   }
 }
