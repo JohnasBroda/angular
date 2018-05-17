@@ -11,9 +11,15 @@ export class ProductInCartCardComponent implements OnInit {
   @Output('remove') removeProduct = new EventEmitter<any>();
   @Input() product;
 
+  public imgIndex: number;
+  // tslint:disable-next-line:no-inferrable-types
+  public imgBtnsVisible: boolean = false;
+
   constructor() { }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.imgIndex = 0;
+  }
 
   public remove(product) {
     this.removeProduct.emit(product);
@@ -21,5 +27,15 @@ export class ProductInCartCardComponent implements OnInit {
 
   public inspect(product) {
 
+  }
+
+  public showPrevImg() {
+    this.imgIndex === 0 ?
+      this.imgIndex = this.product.images.length - 1 : this.imgIndex--;
+  }
+
+  public showNextImg() {
+    this.imgIndex === this.product.images.length - 1 ?
+      this.imgIndex = 0 : this.imgIndex++;
   }
 }

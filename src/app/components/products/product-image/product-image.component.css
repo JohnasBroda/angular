@@ -1,0 +1,44 @@
+.arrow {
+    --arrow-dimension: 30px;
+    width: var(--arrow-dimension);
+    height: var(--arrow-dimension);
+    z-index: 1000;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background-color: rgb(156, 146, 146);
+    opacity: 0.6;
+    border: 1px solid grey;
+    cursor: pointer;
+}
+
+.arrow .fa {
+    font-weight: 600;
+    line-height: 15px;
+    margin: auto;
+    width: 100%;
+}
+
+.arrow-rigth {
+    right: 0;
+}
+
+.arrow-left {
+    left: 0;
+}
+
+.product-card {
+    height: auto;
+    min-height: 200px;
+}
+
+:host {
+    height: auto;
+}
+
+
+.product-img {
+    min-height: calc(25% + var(--arrow-dimension));
+    max-height: calc(25% + var(--arrow-dimension));
+}

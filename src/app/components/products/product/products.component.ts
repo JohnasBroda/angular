@@ -2,27 +2,21 @@ import { IConfigState } from './../../../core/store/config/model';
 import { environment } from './../../../../environments/environment.prod';
 import { QueryConfig } from './../../../core/store/products/reducer';
 import { IAppState } from 'app/app.states';
-import { sideNavTrigger } from './../../../triggers/sideNavTrigger';
-import { mainTrigger } from './../../../triggers/mainTrigger';
 import { ActivatedRoute, Router, ParamMap, NavigationExtras, Params } from '@angular/router';
 import { FilterByPipe } from './../../../interfaces/filterBy-pipe';
 import { sortModes } from './sort-modes';
 import { PaginatorPipe } from './../../../interfaces/paginator-pipe';
 import { OrderByPipe } from './../../../interfaces/orderBy-pipe';
-import { Observable } from 'rxjs/Observable';
 import { FormBuilder, FormControl } from '@angular/forms';
-import { selector } from 'rxjs/operator/publish';
 import { FirebaseListObservable } from 'angularfire2/database-deprecated';
-import { Component, OnInit, Input, EventEmitter, SimpleChanges, KeyValueDiffers, Inject, ViewChildren } from '@angular/core';
+import { Component, OnInit, Input, EventEmitter, SimpleChanges, KeyValueDiffers, Inject, ViewChildren, OnDestroy } from '@angular/core';
 import { FireDbService } from '../../../services/fire-db.service';
 import { FirebaseListFactoryOpts } from 'angularfire2/database-deprecated/interfaces';
 import { ProductService } from '../../../services/product.service';
 import { PageEvent, MatAutocompleteSelectedEvent, MatOptionSelectionChange, MatSelect, MatSelectChange } from '@angular/material';
-import { OnDestroy, OnChanges, DoCheck } from '@angular/core/src/metadata/lifecycle_hooks';
 import { ScrollSvc } from '../../../services/scroll-svc.service';
 import { AddToCartComponent } from '../../cart/add-to-cart/add-to-cart.component';
 import { ComponentType } from '@angular/core/src/render3';
-import { Subscription } from 'rxjs/Subscription';
 import {
   startWith,
   map,
@@ -41,10 +35,7 @@ import {
 } from 'rxjs/operators';
 import { TrackByFunction } from '@angular/core';
 import { SortMode } from '../../../interfaces/sort-mode';
-import { PageScrollService } from 'ng2-page-scroll';
 import { AngularFireStorage } from 'angularfire2/storage';
-import { useAnimation } from '@angular/core/src/animation/dsl';
-import { sideNavToggle } from '../../../triggers/sideNavToggle';
 import { IProduct,
          Product,
          IProductsState,
@@ -58,13 +49,52 @@ import * as fromConfig from '@configState/index';
 import { HttpClient } from '@angular/common/http';
 import { selectProductConfig, IProductConfig } from '@store/config';
 import { Checkbox } from 'primeng/checkbox';
+import { state, style, transition, trigger, animate, query, group } from '@angular/animations';
+import { Observable, Subscription } from 'rxjs';
+import { displayModeOptions } from './display-mode-options';
+import { BreakpointState, Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-product',
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.css'],
   providers: [OrderByPipe, PaginatorPipe, FilterByPipe],
-  animations: [sideNavToggle],
+  animations: [
+    trigger('sideNavToggle', [
+      transition('hide => show', [
+        group([
+          query('.sidenav', [
+            style({
+              opacity: 0,
+              width: 0,
+            }),
+            animate('600ms ease-in')
+          ]),
+          query('.main', [
+            style({ 'margin-left': 0 }),
+            animate('600ms ease-in',
+              style({ 'margin-left': '25vw' })
+            )
+          ]),
+        ]),
+      ]),
+      transition('show => hide', [
+        group([
+          query('.sidenav', [
+            animate('600ms ease-out',
+              style({
+                opacity: 0,
+                width: 0,
+            }))
+          ]),
+          query('.main', [
+            style({ 'margin-left': '25vw' }),
+            animate('600ms ease-out')
+          ]),
+        ])
+      ]),
+    ]),
+  ],
 })
 export class ProductComponent implements OnInit, OnDestroy {
   [x: string]: any;
@@ -84,8 +114,6 @@ export class ProductComponent implements OnInit, OnDestroy {
   public scrollY: number;
   private infiniteScrollable: boolean;
   public isActive = false;
-  public sideNavState = 'inactive';
-  public mainState = 'expanded';
   public filteredLength = 0;
   public filterPriceRange: number[] = [0, 100];
   public filterCategories: {} = {};
@@ -100,6 +128,9 @@ export class ProductComponent implements OnInit, OnDestroy {
     'text-primary',
     'border-primary'
   ];
+  public displayModeOptions = displayModeOptions;
+  public isHandset: Observable<BreakpointState> = this.breakpointObserver.observe(Breakpoints.Handset);
+  public filterNavBtnPosition;
   public searchControl: FormControl;
   public searchInput = '';
   private navigationExtras: NavigationExtras = {
@@ -117,7 +148,7 @@ export class ProductComponent implements OnInit, OnDestroy {
   private loading: boolean;
   public configState: Observable<IProductConfig>;
   public filterToggles: string[] = [];
-
+  public showSideNav = false;
   public filterUpdateCount: number;
 
   @ViewChildren(Checkbox) checkBoxes: Checkbox[];
@@ -130,6 +161,7 @@ export class ProductComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private productSvc: ProductService,
     public scrollSvc: ScrollSvc,
+    private breakpointObserver: BreakpointObserver,
     private fb: FormBuilder,
     public paginatorPipe: PaginatorPipe) {
     this.searchControl = this.fb.control([
@@ -140,6 +172,13 @@ export class ProductComponent implements OnInit, OnDestroy {
                                   .pipe(
                                     tap(filters => this.getFilterCategories(filters)),
                                   );
+    this.isHandset.subscribe(media => {
+      this.filterNavBtnPosition = media.matches ? 'align-self-end' : 'align-self-start';
+    });
+  }
+
+  get sideNavState() {
+    return this.showSideNav ? 'show' : 'hide';
   }
 
   async ngOnInit() {
@@ -323,20 +362,7 @@ export class ProductComponent implements OnInit, OnDestroy {
     }
   }
 
-  public toggleSideNav() {
-    console.log(this.sideNavState);
-    console.log(this.mainState);
-    this.mainState = this.mainstate === 'expanded' ? 'collapsed' : 'expanded';
-    this.sideNavState = this.sideNavState === 'inactive' ? 'active' : 'inactive';
-    console.log(this.sideNavState);
-    console.log(this.mainState);
-  }
-
   public updateUrl(queryParam: any) {
-
-  }
-
-  public scrollToTop() {
 
   }
 

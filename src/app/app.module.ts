@@ -29,9 +29,15 @@ import { MatAutocompleteModule,
         MatSelectModule,
         MatSliderModule,
         MatSnackBarModule,
-        MatTabsModule,
         MatTooltipModule,
-        MatDialog } from '@angular/material';
+        MatDialog,
+        MatToolbarModule,
+        MatButtonModule,
+        MatSidenavModule,
+        MatIconModule,
+        MatListModule,
+} from '@angular/material';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MaterialsModule } from 'app/modules/materials.module';
 import { StoreModule } from '@ngrx/store';
 import { SliderModule } from 'primeng/slider';
@@ -118,6 +124,9 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { HttpClientModule } from '@angular/common/http';
 import { ObjPropertiesPipe } from './interfaces/obj-properties.pipe';
 import { SortPipe } from './interfaces/sort.pipe';
+import { ProductImageComponent } from 'app/components/products/product-image/product-image.component';
+import { MainNavComponent } from './main-nav/main-nav.component';
+import { LayoutModule } from '@angular/cdk/layout';
 
 const directives = [
   ClassesOnHoverDirective,
@@ -155,6 +164,12 @@ const modules = [
   MatCardModule,
   MatChipsModule,
   MatDialogModule,
+  LayoutModule,
+  MatToolbarModule,
+  MatButtonModule,
+  MatSidenavModule,
+  MatIconModule,
+  MatListModule,
   MatExpansionModule,
   MaterialsModule,
   MatPaginatorModule,
@@ -166,7 +181,6 @@ const modules = [
   MatTooltipModule,
   PaginatorModule,
   PopoverModule.forRoot(),
-  ReactiveFormsModule,
   SliderModule,
   StoreModule.forRoot(coreReducer, { metaReducers }),
   CommonModule,
@@ -219,6 +233,7 @@ const entryComponents = [
 ];
 
 const components = [
+  ProductImageComponent,
   AppComponent,
   AddToCartComponent,
   ProductInCartCardComponent,
@@ -251,7 +266,8 @@ const components = [
     UserSourcesComponent,
     PaymentFormComponent,
     ObjPropertiesPipe,
-    SortPipe
+    SortPipe,
+    MainNavComponent
   ],
   entryComponents: [
     spinnerComponents,

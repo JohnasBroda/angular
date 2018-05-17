@@ -34,7 +34,7 @@ export class TokenInterceptor implements HttpInterceptor {
             console.log(request);
             return next.handle(request);
           } else {
-            return new ErrorObservable(`Couldn't authenticate request. Please sign In first!`);
+            return Observable.throw(`Couldn't authenticate request. Please sign In first!`);
           }
         })
       );

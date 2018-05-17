@@ -18,6 +18,9 @@ export class AddToCartComponent implements OnInit, OnDestroy {
   public amount = 1;
   public amountGroup: FormGroup;
   public dialogSub: Subscription;
+  public imgIndex: number;
+  // tslint:disable-next-line:no-inferrable-types
+  public imgBtnsVisible: boolean = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -29,6 +32,7 @@ export class AddToCartComponent implements OnInit, OnDestroy {
     }
 
   ngOnInit() {
+    this.imgIndex = 0;
     this.dialogSub = this.dialogRef.backdropClick().subscribe();
     this.amountGroup = this.fb.group({
       productAmount: [ this.amount, CustomValidators.mustBeNumberValidator],
@@ -44,6 +48,16 @@ export class AddToCartComponent implements OnInit, OnDestroy {
     } else {
       this.dialogRef.close();
     }
+  }
+
+  public showPrevImg() {
+    this.imgIndex === 0 ?
+      this.imgIndex = this.product.images.length - 1 : this.imgIndex--;
+  }
+
+  public showNextImg() {
+    this.imgIndex === this.product.images.length - 1 ?
+      this.imgIndex = 0 : this.imgIndex++;
   }
 
   public increaseAmount() {

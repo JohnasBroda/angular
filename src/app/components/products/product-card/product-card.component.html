@@ -16,33 +16,8 @@
     
     <mat-card-content class="row col-md-12 product-img d-block m-0">
 
-      <div class="col-md-12 img" 
-        (mouseenter)="imgBtnsVisible = true"
-        (mouseleave)="imgBtnsVisible = false">
-  
-        <button
-          [hidden]="!imgBtnsVisible"
-          class="position-absolute arrow arrow-left"
-          (click)="showPrevImg()">
-          <span class="fa fa-angle-left"></span>
-        </button>
-  
-        <ng-container *ngFor="let img of product.images; let i = index">
-          <img mat-card-image
-            *ngIf="i === imgIndex"
-            [src]="product.images[i]"
-            style="max-height: 100px; object-fit:contain">
-        </ng-container>
-  
-        <button
-          [hidden]="!imgBtnsVisible"
-          class="position-absolute arrow arrow-rigth"
-          (click)="showNextImg()">
-          <span class="fa fa-angle-right"></span>
-        </button>
-  
-      </div>
-
+      <app-product-image [urls]="product.images"></app-product-image>
+      
       <span class="col-md-12 d-flex justify-content-center">
         Price: {{ product?.price | currency }}
       </span>

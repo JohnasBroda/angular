@@ -5,7 +5,6 @@ import { MatDialogRef, MatDialog, MatDialogConfig } from '@angular/material';
 import { AngularFireStorage } from 'angularfire2/storage';
 import { Product } from '@store/products';
 import { IUser } from '@store/user/model';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { AfterViewInit } from '@angular/core/src/metadata/lifecycle_hooks';
 
 @Component({
@@ -26,17 +25,12 @@ export class ProductCardComponent implements OnInit {
   @Output('edit') productToEdit = new EventEmitter<Product>();
 
   public addToCartDialogRef: MatDialogRef<any>;
-  public imgIndex: number;
-  // tslint:disable-next-line:no-inferrable-types
-  public imgBtnsVisible: boolean = false;
 
   constructor(
     public dialog: MatDialog,
     private storage: AngularFireStorage) { }
 
-  ngOnInit() {
-    this.imgIndex = 0;
-  }
+  ngOnInit() {}
 
   public inspect(product) {
     this.prodcutToInspect.emit(product);
@@ -44,16 +38,6 @@ export class ProductCardComponent implements OnInit {
 
   public edit(product) {
     this.productToEdit.emit(product);
-  }
-
-  public showPrevImg() {
-    this.imgIndex === 0 ?
-      this.imgIndex = this.product.images.length - 1 : this.imgIndex--;
-  }
-
-  public showNextImg() {
-    this.imgIndex === this.product.images.length - 1 ?
-      this.imgIndex = 0 : this.imgIndex++;
   }
 
   public addToCart(product: Product) {

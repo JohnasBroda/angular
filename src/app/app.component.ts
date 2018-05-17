@@ -1,5 +1,3 @@
-import { ToastService } from './services/toast.service';
-import { CartService } from './services/cart.service';
 import { Component } from '@angular/core';
 import {
   transition,
@@ -9,14 +7,16 @@ import {
   animate,
   group,
   animateChild } from '@angular/animations';
-import { OnInit, DoCheck } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Observable } from 'rxjs/Observable';
-import { Message } from 'primeng/api';
-import { IAppState } from 'app/app.states';
-import { Store } from '@ngrx/store';
 import { RouterState } from '@angular/router/src/router_state';
 import { RouterStateUrl } from 'app/shared/utils/ngrx.router';
 import { RouterOutlet } from '@angular/router/src/directives/router_outlet';
+import { OnInit, DoCheck } from '@angular/core/src/metadata/lifecycle_hooks';
+import { Store } from '@ngrx/store';
+import { IAppState } from 'app/app.states';
+import { Message } from 'primeng/api';
+import { ToastService } from 'app/services/toast.service';
+
 
 @Component({
   selector: 'app-root',
@@ -53,38 +53,25 @@ import { RouterOutlet } from '@angular/router/src/directives/router_outlet';
 })
 export class AppComponent implements OnInit, DoCheck {
 
-  public navLinks = [
-    { path: '/landing', label: 'Landing' },
-    { path: '/login', label: 'Sign in' },
-    { path: '/register', label: 'register' },
-    { path: '/products', label: 'Products' },
-    { path: '/acces-denied', label: 'No access' },
-    { path: '/cart', label: 'cart' },
-  ];
-
-  public amountInCart: Observable<number>;
+  public router;
   public messages: Message[];
   public routerState: Observable<any>;
-  public router;
 
   constructor(
-    public cartSvc: CartService,
-    private toaster: ToastService,
-    private store: Store<IAppState>) {}
+    private store: Store<IAppState>,
+    private toaster: ToastService) {}
 
-  ngOnInit() {
-    this.amountInCart = this.cartSvc.amountInCart;
+  public ngOnInit() {
     this.store.select(state => state.router).subscribe(state => {
       this.router = state;
-      console.log(this.router);
     });
-  }
-
-  ngDoCheck() {
-    this.messages = this.toaster.messages;
   }
 
   public getPage(outlet: RouterOutlet) {
     return outlet.activatedRouteData['page'] || 'access-denied';
+  }
+
+  ngDoCheck() {
+    this.messages = this.toaster.messages;
   }
 }

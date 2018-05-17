@@ -1,0 +1,27 @@
+<div class="col-md-12 img" 
+  (mouseenter)="showImgBtns = true"
+  (mouseleave)="showImgBtns = false">
+
+    <button 
+      [hidden]="!showImgBtns"
+      (click)="showPrevImg()"
+      class="position-absolute arrow arrow-left">
+      <span class="fa fa-angle-left"></span>
+    </button>
+
+    <ng-container 
+      *ngFor="let img of images; let i = index">
+      <img mat-card-image
+        *ngIf="i === imgIndex"
+        [src]="images[i]"
+        style="max-height: 100px; object-fit:contain">
+    </ng-container>
+
+    <button
+      [hidden]="!showImgBtns"
+      (click)="showNextImg()"
+      class="position-absolute arrow arrow-rigth">
+      <span class="fa fa-angle-right"></span>
+    </button>
+
+  </div>

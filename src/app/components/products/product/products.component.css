@@ -6,7 +6,6 @@
     left: 0;
     background-color: rgb(255, 255, 255);
     overflow-x: hidden;
-    
     transition: 0.5s;
     width: 25vw;
 }
@@ -26,7 +25,15 @@
 
 .main {
     height: auto;
-    width: 100vw;
+    width: 100%;
+}
+
+.no-margin {
+    margin: 0;
+}
+
+.left-margin {
+    margin-left: 25vw;
 }
 
 :host {

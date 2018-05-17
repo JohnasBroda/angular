@@ -1,7 +1,6 @@
 import { IAppState } from 'app/app.states';
 import { EmailAuthService } from './../../services/email-auth.service';
 import { DoCheck } from '@angular/core/src/metadata/lifecycle_hooks';
-import { Observable } from 'rxjs/Observable';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Component, OnInit, Input, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms/src/model';

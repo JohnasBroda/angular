@@ -1,8 +1,11 @@
 <div class="row products-container" 
   scrollable
-  (scrollPosition)="scrollHandler($event)">
+  (scrollPosition)="scrollHandler($event)"
+  [@sideNavToggle]="sideNavState">
 
-  <div class="sidenav border border-primary" id="sideNav">
+  <div *ngIf="showSideNav"
+    class="sidenav border border-primary"
+    id="sideNav">
 
     <span class="col-md-12 d-block py-4">
       <span class="w-100">Price range: {{ filterPriceRange[0] }} - {{ filterPriceRange[1] }}</span>
@@ -53,22 +56,28 @@
 
   </div> <!-- END OF Sidenav -->
 
-  <div class="row main" id="main">
+  <div class="row main"
+    [ngClass]="{ 'no-margin': !showSideNav, 'left-margin': showSideNav }"
+    id="main">
 
         <ng-container *ngIf="productState | async as state">
 
           <ng-container *ngIf="state.products">
 
-            <span class="col-md-12 d-flex justify-content-center">
+            <span class="col-md-12 d-flex">
 
-                <span class="col-md-1 align-self-start">
-                  <button class="btn btn-default" (click)="toggleSideNav()">
+                <span class="col-md-1"
+                  [ngClass]="filterNavBtnPosition">
+                  <button 
+                    class="btn btn-default"
+                    (click)="showSideNav = !showSideNav">
                     <i class="fa fa-bars"></i>
                   </button>
                 </span>
           
                 <span class="w-50 mx-auto" *ngIf="state.pageEvent">
-                  <p-paginator [rows]="pageEvent?.rows"
+                  <p-paginator
+                    [rows]="pageEvent?.rows"
                     [first]="pageEvent?.first"
                     [totalRecords]="productsCount | async"
                     [pageLinkSize]="pageLinkSize | async"
@@ -78,7 +87,10 @@
                 </span>
           
                 <span class="col-md-2 h-auto">
-                  <button class="btn btn-default" (click)="togglePaginationMode()">
+                  <button 
+                    class="btn btn-default"
+                    (click)="togglePaginationMode()"
+                    *ngIf="false">
                     change pagination mode
                   </button>
                 </span>
@@ -87,93 +99,90 @@
           
             <div class="col-md-12 d-flex justify-content-center">
           
-              <span class="col-md-3 mx-2">
-          
-                <mat-form-field>
-                  <mat-select [(value)]="displayMode">
-                    <mat-option [value]="gridOfTwo">
-                      <i class="fa fa-th-large"></i>
-                      2 card wide Grid
-                    </mat-option>
-                    <mat-option [value]="gridOfThree">
-                      <i class="fa fa-th"></i>
-                      3 card wide Grid
-                    </mat-option>
-                    <mat-option [value]="gridOfFour">
-                      <span>
-                        <i class="fa fa-th-large"></i>
-                        <i class="fa fa-th-large"></i>
-                      </span>
-                      4 card wide grid
-                    </mat-option>
-                    <mat-option [value]="listDisplay">
-                      <i class="fa fa-th-list"></i>
-                      list
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-          
-              </span>  <!-- END of displayMode Dropdown list -->
-          
-              <span class="col-md-3 mx-2">
-    
-                <mat-form-field>
-                  <mat-select 
-                    [(value)]="sortMode" 
-                    placeholder="Choose a sort mode">
-                    <mat-option 
-                      *ngFor="let mode of sortModes" 
-                      [value]="mode">
-                      <i class="{{mode.icon}}"></i>
-                      {{ mode.text }}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-    
-              </span> <!-- End of sort mode drop down list -->
-          
-              <span class="col-md-3 d-flex jusify-content-center mx-2">
-          
-                <mat-form-field class="w-100">
-                  <input 
-                    type="text"
-                    matInput 
-                    [formControl]="searchControl" 
-                    [matAutocomplete]="auto" 
-                    (keyup.enter)="onEnter($event)">
-                  <span *ngIf="typeAheadLoading" matSuffix>
-                    <app-spinner-container 
-                      spinner="ThreeCirclesLine"
-                      color="red"
-                      size="medium"
-                      display="inline">
-                    </app-spinner-container>
-                  </span>
+              <div class="row"> 
 
-                  <mat-autocomplete 
-                    #auto="matAutocomplete"
-                    (optionSelected)="onOptionSelected($event.option.value)" 
-                    autoActiveFirstOption="true">
-
-                    <div *ngIf="(typeAheadResults | async) as results">
-
-                      <mat-option
-                        *ngFor="let result of results"
-                        [value]="result">
-                        <span style="float:left">{{ result.term }}</span>
-                        <span style="float:right">{{ result.count }}</span> 
+                <span class="col-md-3 mx-2 col-sm-12">
+          
+                  <mat-form-field class="w-100">
+                    <mat-select
+                      [(value)]="displayMode"
+                      placeholder="Choose a display mode">
+                      <ng-container *ngFor="let option of displayModeOptions">
+                        <mat-option 
+                          *ngIf=" !(isHandset | async)!.matches
+                                  || option.value === 'listDisplay'"
+                          [value]="option.value">
+                          <i class="option.icon"></i>
+                          <i class="option.icon" *ngIf="option.value === 'gridOfFour'"></i>
+                          {{ option.text }}
+                        </mat-option>
+                      </ng-container>
+                    </mat-select>
+                  </mat-form-field>
+            
+                </span>  <!-- END of displayMode Dropdown list -->
+            
+                <span class="col-md-3 mx-2 col-sm-12">
+      
+                  <mat-form-field class="w-100">
+                    <mat-select 
+                      [(value)]="sortMode" 
+                      placeholder="Choose a sort mode">
+                      <mat-option 
+                        *ngFor="let mode of sortModes" 
+                        [value]="mode">
+                        <i [class]="mode.icon"></i>
+                        {{ mode.text }}
                       </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+      
+                </span> <!-- End of sort mode drop down list -->
+            
+                <span class="col-md-3 col-sm-12 d-flex jusify-content-center mx-2">
+            
+                  <mat-form-field class="w-100">
+                    <input 
+                      type="text"
+                      matInput 
+                      [formControl]="searchControl" 
+                      [matAutocomplete]="auto" 
+                      (keyup.enter)="onEnter($event)">
+                    <span *ngIf="typeAheadLoading" matSuffix>
+                      <app-spinner-container 
+                        spinner="ThreeCirclesLine"
+                        color="red"
+                        size="medium"
+                        display="inline">
+                      </app-spinner-container>
+                    </span>
+  
+                    <mat-autocomplete 
+                      #auto="matAutocomplete"
+                      (optionSelected)="onOptionSelected($event.option.value)" 
+                      autoActiveFirstOption="true">
+  
+                      <div *ngIf="(typeAheadResults | async) as results">
+  
+                        <mat-option
+                          *ngFor="let result of results"
+                          [value]="result">
+                          <span style="float:left">{{ result.term }}</span>
+                          <span style="float:right">{{ result.count }}</span> 
+                        </mat-option>
+  
+                        <mat-option disabled="true" *ngIf="!results.length">
+                          No Results
+                        </mat-option>
+  
+                      </div>
+  
+                    </mat-autocomplete>
+                  </mat-form-field>
+            
+                </span> <!-- end of autocomplete search box -->
 
-                      <mat-option disabled="true" *ngIf="!results.length">
-                        No Results
-                      </mat-option>
-
-                    </div>
-
-                  </mat-autocomplete>
-                </mat-form-field>
-          
-              </span> <!-- end of autocomplete search box -->
+              </div>
           
             </div> <!-- ENd of Top filter row -->
           
@@ -238,10 +247,3 @@
   </div> <!-- END Of Main -->
 
 </div> <!-- END OF SidenaveTrigger -->
-
-<button 
-  (click)="scrollToTop()"
-  *ngIf="isScrollable | async"
-  class="position-fixed btn btn-default border rounded floatedScrollBtn">
-  <i class="fa fa-angle-double-up"></i>
-</button>
