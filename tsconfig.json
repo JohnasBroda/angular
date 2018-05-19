@@ -22,7 +22,18 @@
       "@authState/*": ["app/core/store/auth/index"],
       "@configState/*": ["app/core/store/config/index"],
       "@products/*": ["app/core/store/products/index"],
-      "@environments/*": ["environments/*"]
+      "@environments/*": ["environments/*"],
+      "@directives": ["app/shared/directives/index"],
+      "@pipes": ["app/shared/pipes/index"],
+      "@stripe/*": ["app/shared/interfaces/stripe/*"],
+      "@services/*": ["app/core/services/*"],
+      "@auth": ["app/core/services/auth/index"],
+      "@interfaces": ["app/shared/interfaces/index"],
+      "@components": ["app/shared/components/index"],
+      "@shared/*": ["app/shared/*"],
+      "@core/*": ["app/core/*"],
+      "@env/*": ["environments/*"],
+      "@app/*": ["app/*"]
     }
   }
 }

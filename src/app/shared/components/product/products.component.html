@@ -1,0 +1,246 @@
+<div class="row products-container" 
+  scrollable
+  (scrollPosition)="scrollHandler($event)"
+  [@sideNavToggle]="sideNavState">
+
+  <div *ngIf="showSideNav"
+    class="sidenav border border-primary"
+    id="sideNav">
+
+    <span class="col-md-12 d-block py-4">
+      <span class="w-100">Price range: {{ filterPriceRange[0] }} - {{ filterPriceRange[1] }}</span>
+      <p-slider
+        [(ngModel)]="filterPriceRange"
+        step="1"
+        [range]="true"
+        min="0"
+        max="100"
+        (onSlideEnd)="onSlideEnd($event)">
+      </p-slider>
+    </span> <!-- END of proce range checkbox column --> 
+
+    <ng-container *ngIf="configState | async as confState">
+
+      <div 
+        *ngFor="let indexGroup of confState['filters'] | objProperties"
+        class="col-md-12 d-inline-block m-2 p-1 filter-container">
+
+        <span >
+          Selected {{ indexGroup }}:
+        </span>s
+
+        <p-checkbox 
+          class="col-md-10 mx-auto d-inline-block"
+          [name]="indexGroup"
+          [value]="indexGroup"
+          [label]=" 'toggle All  ' + indexGroup"
+          [(ngModel)]="filterToggles"
+          (onChange)="onFilterChange($event, indexGroup)">
+        </p-checkbox>
+
+        <p-checkbox
+          *ngFor="let indexes of confState['filters'][indexGroup] | sort: 'ASC' "
+          class="col-md-10 mx-auto d-inline-block"
+          [name]="indexGroup"
+          [value]="indexes.name"
+          [label]="indexes.name + ' - ' + indexes.count"
+          [(ngModel)]="filterCategories[indexGroup]"
+          (onChange)="onFilterChange($event, indexGroup, indexes.name)">
+        </p-checkbox>
+
+      </div> <!-- END of categories checkbox column --> s
+
+      <span class="col-md-10 mx-auto d-inline-block m-4"></span>
+
+    </ng-container>
+
+  </div> <!-- END OF Sidenav -->
+
+  <div class="row main"
+    [ngClass]="{ 'no-margin': !showSideNav, 'left-margin': showSideNav }"
+    id="main">
+
+        <ng-container *ngIf="productState | async as state">
+
+          <ng-container *ngIf="state.products">
+
+            <span class="col-md-12 d-flex justify-content-center">
+
+                <span class="col-md-1 align-self-start">
+                  <button class="btn btn-default" (click)="showSideNav = !showSideNav">
+                    <i class="fa fa-bars"></i>
+                  </button>
+                </span>
+          
+                <span class="w-50 mx-auto" *ngIf="state.pageEvent">
+                  <p-paginator
+                    [rows]="pageEvent?.rows"
+                    [first]="pageEvent?.first"
+                    [totalRecords]="productsCount | async"
+                    [pageLinkSize]="pageLinkSize | async"
+                    [rowsPerPageOptions]="pageSizeOptions"
+                    (onPageChange)="pageEventHandler($event)">
+                  </p-paginator>
+                </span>
+          
+                <span class="col-md-2 h-auto">
+                  <button class="btn btn-default" (click)="togglePaginationMode()">
+                    change pagination mode
+                  </button>
+                </span>
+          
+            </span> <!-- END of top paginator row -->
+          
+            <div class="col-md-12 d-flex justify-content-center">
+          
+              <span class="col-md-3 mx-2">
+          
+                <mat-form-field>
+                  <mat-select [(value)]="displayMode">
+                    <mat-option [value]="gridOfTwo">
+                      <i class="fa fa-th-large"></i>
+                      2 card wide Grid
+                    </mat-option>
+                    <mat-option [value]="gridOfThree">
+                      <i class="fa fa-th"></i>
+                      3 card wide Grid
+                    </mat-option>
+                    <mat-option [value]="gridOfFour">
+                      <span>
+                        <i class="fa fa-th-large"></i>
+                        <i class="fa fa-th-large"></i>
+                      </span>
+                      4 card wide grid
+                    </mat-option>
+                    <mat-option [value]="listDisplay">
+                      <i class="fa fa-th-list"></i>
+                      list
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+          
+              </span>  <!-- END of displayMode Dropdown list -->
+          
+              <span class="col-md-3 mx-2">
+    
+                <mat-form-field>
+                  <mat-select 
+                    [(value)]="sortMode" 
+                    placeholder="Choose a sort mode">
+                    <mat-option 
+                      *ngFor="let mode of sortModes" 
+                      [value]="mode">
+                      <i class="{{mode.icon}}"></i>
+                      {{ mode.text }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+    
+              </span> <!-- End of sort mode drop down list -->
+          
+              <span class="col-md-3 d-flex jusify-content-center mx-2">
+          
+                <mat-form-field class="w-100">
+                  <input 
+                    type="text"
+                    matInput 
+                    [formControl]="searchControl" 
+                    [matAutocomplete]="auto" 
+                    (keyup.enter)="onEnter($event)">
+                  <span *ngIf="typeAheadLoading" matSuffix>
+                    <app-spinner-container 
+                      spinner="ThreeCirclesLine"
+                      color="red"
+                      size="medium"
+                      display="inline">
+                    </app-spinner-container>
+                  </span>
+
+                  <mat-autocomplete 
+                    #auto="matAutocomplete"
+                    (optionSelected)="onOptionSelected($event.option.value)" 
+                    autoActiveFirstOption="true">
+
+                    <div *ngIf="(typeAheadResults | async) as results">
+
+                      <mat-option
+                        *ngFor="let result of results"
+                        [value]="result">
+                        <span style="float:left">{{ result.term }}</span>
+                        <span style="float:right">{{ result.count }}</span> 
+                      </mat-option>
+
+                      <mat-option disabled="true" *ngIf="!results.length">
+                        No Results
+                      </mat-option>
+
+                    </div>
+
+                  </mat-autocomplete>
+                </mat-form-field>
+          
+              </span> <!-- end of autocomplete search box -->
+          
+            </div> <!-- ENd of Top filter row -->
+          
+            <div class="col-md-12 p-3 d-flex flex-wrap flex-row justify-content-center align-items-center">
+          
+              <ng-container *ngIf="state.products; else loadingProducts" class="col-md-12 p-3">
+                <app-product-card 
+                  *ngFor="let product of state.products
+                          | filterBy: filters : filterUpdateCount
+                          | orderBy: sortMode
+                          | paginator: pageEvent;
+                          trackBy: trackById"
+                  [product]="product"
+                  [currentUser]="currentUser"
+                  [ngClass]="displayMode"
+                  (select)="onInspect(product)"
+                  (edit)="onEdit(product)"
+                  class="d-block p-0">
+                </app-product-card>
+              </ng-container>
+          
+              <ng-template #loadingProducts>
+                  <app-spinner-container
+                  spinner="small-circles"
+                  color="red"
+                  size="large"
+                  display="block">
+                </app-spinner-container>
+              </ng-template> <!-- END of Loading products spinner -->
+          
+            </div> <!-- END of Products Row -->
+          
+            <div class="col-md-12 d-flex justify-content-center" *ngIf="state.pageEvent">
+          
+              <span class="w-50 mx-auto">
+          
+                <p-paginator [rows]="pageEvent?.rows"
+                  [first]="pageEvent?.first"
+                  [totalRecords]="productsCount | async"
+                  [pageLinkSize]="pageLinkSize | async"
+                  [rowsPerPageOptions]="pageSizeOptions"
+                  (onPageChange)="pageEventHandler($event)">
+                </p-paginator>
+          
+              </span> <!-- END of bottom paginator -->
+          
+            </div> <!-- END of botttom paginator row -->
+
+          </ng-container> <!-- END of products continer -->
+
+          <ng-template *ngIf="state.loading && !state.products">
+            <app-spinner-container
+              spinner="Bars"
+              color="red"
+              size="huge"
+              display="fullscreen">
+            </app-spinner-container>
+          </ng-template> <!-- END of pageLoading spinner -->
+
+        </ng-container> <!-- END of page container -->
+
+  </div> <!-- END Of Main -->
+
+</div> <!-- END OF SidenaveTrigger -->

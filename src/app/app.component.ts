@@ -9,13 +9,12 @@ import {
   animateChild } from '@angular/animations';
 import { Observable } from 'rxjs/Observable';
 import { RouterState } from '@angular/router/src/router_state';
-import { RouterStateUrl } from 'app/shared/utils/ngrx.router';
 import { RouterOutlet } from '@angular/router/src/directives/router_outlet';
 import { OnInit, DoCheck } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Store } from '@ngrx/store';
-import { IAppState } from 'app/app.states';
 import { Message } from 'primeng/api';
-import { ToastService } from 'app/services/toast.service';
+import { ToastService } from '@services/utils/toast.service';
+import { IAppState } from '@store/app.states';
 
 
 @Component({

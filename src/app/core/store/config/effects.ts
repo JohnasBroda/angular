@@ -6,13 +6,18 @@ import { map, catchError, switchMap, take } from 'rxjs/operators';
 import { of } from 'rxjs/observable/of';
 import * as configActions from './actions';
 import { tap } from 'rxjs/operators/tap';
-import { AngularFirestoreCollection, AngularFirestore, AngularFirestoreDocument, QueryFn } from 'angularfire2/firestore';
-import { IAppState } from 'app/app.states';
-import { PaginationService } from 'app/services/pagination.service';
+import {
+    AngularFirestoreCollection,
+    AngularFirestore,
+    AngularFirestoreDocument,
+    QueryFn
+} from 'angularfire2/firestore';
 import { ConfigActionTypes } from './actions';
-import { AngularFireDatabase } from 'angularfire2/database';
+import { AngularFireDatabase, AngularFireAction } from 'angularfire2/database';
 import index from 'caseless';
-import { AngularFireAction } from 'angularfire2/database/interfaces';
+import { IAppState } from '@store/app.states';
+import { PaginationService } from '@services/pagination.service';
+import * as firebase from 'firebase/app';
 
 export type Action = configActions.All;
 
@@ -20,11 +25,11 @@ export type Action = configActions.All;
 export class ConfigEffects {
 
     @Effect()
-    getProductCategories$: Observable<Action> = this.actions$.pipe(
+    public getProductCategories$: Observable<Action> = this.actions$.pipe(
         ofType(ConfigActionTypes.GET_PRODUCT_FILTERS),
         switchMap(() => this.loadProductCategories()),
-        map(indexes => new configActions.UpdateState(indexes)),
-        catchError(err => Observable.of(new configActions.ConfigError(err)))
+        map((indexes) => new configActions.UpdateState(indexes)),
+        catchError((err) => Observable.of(new configActions.ConfigError(err)))
     );
 
     constructor(
@@ -37,11 +42,11 @@ export class ConfigEffects {
     private loadProductCategories(): Observable<any> {
         return this.rtlDb.list('productIndexes').snapshotChanges()
                 .pipe(
-                    map(indexes => this.tranformIndexes(indexes))
+                    map((indexes) => this.tranformIndexes(indexes))
                 );
     }
 
-    private tranformIndexes(indexes: AngularFireAction<firebase.database.DataSnapshot>[]): {} {
+    private tranformIndexes(indexes: Array<AngularFireAction<firebase.database.DataSnapshot>>): {} {
         const productIndexes = {};
         indexes.forEach((v, i) => {
             const data = indexes[i].payload.val();
@@ -49,9 +54,9 @@ export class ConfigEffects {
             for (const prop in data) {
                 if (data.hasOwnProperty(prop)) {
                  const newIndexObj = {};
-                    newIndexObj['name'] = prop;
-                    newIndexObj['count'] = data[prop];
-                    flatData.push(newIndexObj);
+                 newIndexObj['name'] = prop;
+                 newIndexObj['count'] = data[prop];
+                 flatData.push(newIndexObj);
                 }
             }
             productIndexes[ indexes[i].key ] = flatData;

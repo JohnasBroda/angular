@@ -1,0 +1,8 @@
+swiper{
+    height: 400px;
+    width: 100vw;
+}
+
+.swiper-wrapper {
+    box-sizing: border-box;
+}

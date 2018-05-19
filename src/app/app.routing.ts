@@ -1,17 +1,20 @@
-import { AccessDeniedComponent } from 'app/components/access-denied/access-denied.component';
-import { CartComponent } from 'app/components/cart/cart.component';
-import { CheckoutComponent } from 'app/components/cechkout/cechkout.component';
-import { LandingComponent } from 'app/components/landing/landing.component';
-import { LoginFormComponent } from 'app/components/login-form-component/login-form-component.component';
-import { ProductComponent } from 'app/components/products/product/products.component';
-import { EditProductComponent } from 'app/components/products/edit-product/edit-product.component';
-import { ProductViewComponent } from 'app/components/products/product-view/product-view.component';
-import { RegisterComponent } from 'app/components/register/register.component';
-import { UploadFormComponent } from 'app/components/upload-form/upload-form.component';
-import { UserComponent } from 'app/components/user/user.component';
-import { NotFoundComponent } from 'app/components/not-found/not-found.component';
-import { AuthGuard } from 'app/services/auth-guard.service';
-import { AddProductComponent } from 'app/add-product/add-product.component';
+import {
+  AccessDeniedComponent,
+  CartComponent,
+  CheckoutComponent,
+  LandingComponent,
+  LoginFormComponent,
+  EditProductComponent,
+  AddProductComponent,
+  ProductComponent,
+  ProductViewComponent,
+  RegisterComponent,
+  UploadFormComponent,
+  UserComponent,
+  NotFoundComponent
+} from '@components';
+import { AuthGuard } from '@services/auth/auth-guard.service';
+
 
 export const routes = [
   {
@@ -45,9 +48,9 @@ export const routes = [
     data: { page: 'login' }
   },
   {
-    path: 'products/edit-product/:productName',
+    path: 'products/edit-product/:id',
     component: EditProductComponent,
-    data: { page: 'products/edit-product/:productName' },
+    data: { page: 'products/edit-product/:id' },
     canActivate: [AuthGuard]
   },
   {
@@ -63,9 +66,9 @@ export const routes = [
     canActivate: [AuthGuard]
   },
   {
-    path: 'products/product/:productName',
+    path: 'products/product/:Id',
     component: ProductViewComponent,
-    data: { page: 'products/product/:productName' },
+    data: { page: 'products/:id' },
     canActivate: [AuthGuard]
   },
   {

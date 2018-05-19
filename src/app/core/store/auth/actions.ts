@@ -1,6 +1,6 @@
-import { AuthProvider } from './../../../services/auth.service';
 import { Action } from '@ngrx/store';
-import { IUser, User } from '@store/user/model';
+import { User } from '@store/auth';
+import { AuthProvider } from '@services/auth/auth.service';
 
 export enum AuthActionTypes {
     AUTHENTICATED = '[AUTH] Authenticated',
@@ -23,12 +23,12 @@ export class GetUser implements Action {
 }
 
 export class Authenticated implements Action {
-    readonly type = AuthActionTypes.AUTHENTICATED;
+    public readonly type = AuthActionTypes.AUTHENTICATED;
     constructor(public payload?: any) {}
 }
 
 export class NotAuthenticated implements Action {
-    readonly type = AuthActionTypes.NOT_AUTHENTICATED;
+    public readonly type = AuthActionTypes.NOT_AUTHENTICATED;
     constructor(public payload?: any) {}
 }
 

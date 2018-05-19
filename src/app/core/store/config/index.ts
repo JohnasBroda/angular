@@ -1,6 +1,4 @@
-import { createFeatureSelector } from '@ngrx/store';
-import { IAppState } from 'app/app.states';
-import { Product } from '@store/products/product/model';
+import { IAppState } from '@store/app.states';
 
 export * from './reducer';
 export * from './actions';

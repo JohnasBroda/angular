@@ -1,4 +1,3 @@
-import { Product, QueryConfig, IProductsState } from '@products/';
 import { Action } from '@ngrx/store';
 
 export enum ConfigActionTypes {

@@ -1,7 +1,7 @@
 import { OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
-import { IProduct } from '@store/products';
 import { FormGroup } from '@angular/forms/src/model';
+import { IProduct } from '@store/product';
 
 export abstract class ProductFormBase implements OnInit {
 

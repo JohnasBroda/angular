@@ -1,8 +1,7 @@
 import { IConfigState, FilterCategories } from './model';
-import { IAppState } from 'app/app.states';
 import * as configActions from './actions';
 import { ConfigActionTypes } from './actions';
-
+import { IAppState } from '@store/app.states';
 
 function getInitialState() {
   const configState: IConfigState = JSON.parse(localStorage.getItem('configState'));

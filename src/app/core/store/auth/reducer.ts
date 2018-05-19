@@ -1,8 +1,7 @@
-import { IAppState } from 'app/app.states';
+import { User } from './model';
 import { AuthActionTypes, All, GetUser } from './actions';
-import * as authActions from './actions';
-import { User } from '@store/user/model';
 import { INITIAL_REDUCERS } from '@ngrx/store/src/tokens';
+import { IAppState } from '@store/app.states';
 
 function getInitialState() {
   const currentUser: User = JSON.parse(localStorage.getItem('currentUser'));
@@ -11,7 +10,7 @@ function getInitialState() {
 
 const initialState: User = getInitialState();
 
-type Action = authActions.All;
+type Action = All;
 
 export const selectUser = (state: IAppState) => state.user;
 

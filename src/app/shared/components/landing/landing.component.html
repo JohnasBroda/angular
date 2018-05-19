@@ -1,0 +1,20 @@
+
+<swiper [config]="config">
+    <div class="swiper-wrapper">
+        <div class="swiper-slide">Slide 1</div>
+        <div class="swiper-slide">Slide 2</div>
+    </div>
+    <!-- Pagination -->
+    <div class="swiper-pagination"></div>
+    <!-- Arrows -->
+    <div class="swiper-button-next"></div>
+    <div class="swiper-button-prev"></div>
+</swiper>
+
+<app-spinner-container
+    *ngIf=""
+    spinner="Bars"
+    color="red"
+    size="huge"
+    display="fullscreen">
+</app-spinner-container>
